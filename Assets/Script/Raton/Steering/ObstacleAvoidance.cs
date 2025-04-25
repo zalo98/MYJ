@@ -1,42 +1,36 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class ObstacleAvoidance : MonoBehaviour, ISteeringBehavior
+public class ObstacleAvoidance : MonoBehaviour
 {
-    [SerializeField] private float detectionRange = 3f;
-    [SerializeField] private float avoidForce = 2f;
-    [SerializeField] private LayerMask obstacleMask;
-
-    public Vector3 CalculateSteering(EnemySteering owner)
+    [SerializeField] float detectionRange;
+    [SerializeField] float avoidForce;
+    [SerializeField] LayerMask obstacleMask;
+    public Vector3 Avoid()
     {
-        // Detectar obstáculos cercanos
-        Collider[] obstacles = Physics.OverlapSphere(owner.transform.position, owner.obstacleDetectionRadius, owner.obstacleLayer);
-
-        if (obstacles.Length == 0)
-            return Vector3.zero;
-
-        // Vector de evasión acumulado
-        Vector3 avoidanceForce = Vector3.zero;
-
-        foreach (Collider obstacle in obstacles)
+        var colliders = Physics.OverlapSphere(transform.position, detectionRange, obstacleMask);
+        float minDist = detectionRange + 1;
+        Collider closestCol = null;
+        for (int i = 0; i < colliders.Length; i++)
         {
-            // Calcular vector desde el obstáculo hacia el enemigo
-            Vector3 dirToObstacle = owner.transform.position - obstacle.transform.position;
-            float distance = dirToObstacle.magnitude;
-
-            // La fuerza es inversamente proporcional a la distancia
-            float weight = (owner.obstacleDetectionRadius - distance) / owner.obstacleDetectionRadius;
-            weight = Mathf.Pow(weight, 2); // Aumentar influencia de objetos cercanos
-            Vector3 forceToAdd = dirToObstacle.normalized * weight * 3.0f;
-            avoidanceForce += forceToAdd;
+            //colliders[i].ClosestPoint(transform.position);
+            //float currentDist = Vector3.Distance(transform.position, colliders[i].transform.position);
+            float currentDist = Vector3.Distance(transform.position, colliders[i].ClosestPoint(transform.position));
+            if (currentDist < minDist)
+            {
+                closestCol = colliders[i];
+                minDist = currentDist;
+            }
         }
-        return avoidanceForce;
+        if (closestCol == null) return Vector3.zero;
+        Vector3 dirToAvoid = transform.position - closestCol.ClosestPoint(transform.position);
+        Vector3 avoidDir = new Vector3(dirToAvoid.x, 0, dirToAvoid.z).normalized * avoidForce;
+        avoidDir *= Mathf.Lerp(1, 0, Vector3.Distance(transform.position, closestCol.ClosestPoint(transform.position)) / detectionRange);
+        return avoidDir;
     }
-
-
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
+        Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, detectionRange);
     }
 }
