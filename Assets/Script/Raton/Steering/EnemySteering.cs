@@ -10,9 +10,8 @@ public class EnemySteering : MonoBehaviour
     // Comportamientos de steering
     private Seek seekBehavior;
     private Flee fleeBehavior;
-    private Pursuit pursuitBehavior;
     private Evade evadeBehavior;
-    private ObstacleAvoidance obstacleBehavior;
+    private ObstacleAvoidance obstacleAvoidance;
 
     // Propiedades para los comportamientos
     [HideInInspector] public Vector3 currentVelocity;
@@ -50,15 +49,13 @@ public class EnemySteering : MonoBehaviour
         // Obtener comportamientos de steering
         seekBehavior = GetComponent<Seek>();
         fleeBehavior = GetComponent<Flee>();
-        pursuitBehavior = GetComponent<Pursuit>();
         evadeBehavior = GetComponent<Evade>();
-        obstacleBehavior = GetComponent<ObstacleAvoidance>();
+        obstacleAvoidance = GetComponent<ObstacleAvoidance>();
 
         if (seekBehavior == null) seekBehavior = gameObject.AddComponent<Seek>();
         if (fleeBehavior == null) fleeBehavior = gameObject.AddComponent<Flee>();
-        if (pursuitBehavior == null) pursuitBehavior = gameObject.AddComponent<Pursuit>();
         if (evadeBehavior == null) evadeBehavior = gameObject.AddComponent<Evade>();
-        if (obstacleBehavior == null) obstacleBehavior = gameObject.AddComponent<ObstacleAvoidance>();
+        if (obstacleAvoidance == null) obstacleAvoidance = gameObject.AddComponent<ObstacleAvoidance>();
 
         // Configurar rigidbody si es necesario
         if (rb == null)
@@ -96,7 +93,7 @@ public class EnemySteering : MonoBehaviour
     // Método para seguir la ruta
     public void FollowPath()
     {
-        Vector3 target;
+        Vector3 target = Vector3.zero; // Inicializar con un valor por defecto
 
         if (!goingForward) // Escape
         {
@@ -104,11 +101,15 @@ public class EnemySteering : MonoBehaviour
             currentTargetPosition = target;
             currentMaxSpeed = controller.runSpeed;
 
-            // Combinar comportamientos (con evasión de obstáculos)
-            Vector3 seekForce = seekBehavior.CalculateSteering(this);
-            Vector3 avoidForce = obstacleBehavior.CalculateSteering(this);
+            // Dirección base hacia el punto de inicio
+            Vector3 dirToStart = (target - transform.position).normalized * controller.runSpeed;
 
-            Vector3 combinedForce = seekForce + avoidForce * obstacleAvoidanceWeight;
+            // Obtener fuerza de evasión
+            Vector3 avoidForce = obstacleAvoidance.Avoid();
+
+            // Combinar fuerzas
+            Vector3 combinedForce = dirToStart + avoidForce;
+
             ApplySteering(combinedForce, controller.runSpeed);
         }
         else if (!reachedEndPoint) // Ida (A → B)
@@ -130,39 +131,33 @@ public class EnemySteering : MonoBehaviour
             currentTargetPosition = target;
             currentMaxSpeed = controller.walkSpeed;
 
-            // Agregar evasión de obstáculos también en la fase de patrulla
-            Vector3 seekForce = seekBehavior.CalculateSteering(this);
-            Vector3 avoidForce = obstacleBehavior.CalculateSteering(this);
+            // Dirección base hacia el waypoint
+            Vector3 dirToTarget = (target - transform.position).normalized * controller.walkSpeed;
 
-            // Usar un peso posiblemente menor para la evasión durante patrulla
-            Vector3 combinedForce = seekForce + avoidForce * (obstacleAvoidanceWeight * 0.7f);
+            // Obtener fuerza de evasión
+            Vector3 avoidForce = obstacleAvoidance.Avoid();
+
+            // Combinar fuerzas
+            Vector3 combinedForce = dirToTarget + avoidForce;
+
             ApplySteering(combinedForce, controller.walkSpeed);
         }
         else // Vuelta (B → A)
         {
-            if (currentWaypointIndex >= 0 && currentWaypointIndex < waypoints.Length)
-                target = waypoints[currentWaypointIndex].position;
-            else
-                target = startPoint.position;
-
-            // Si llegó al punto A
-            if (HasReachedDestination(startPoint.position))
-            {
-                reachedEndPoint = false;
-                currentWaypointIndex = 0;
-                waypointDirection = 1;
-                return;
-            }
+            // Código existente para determinar target...
 
             currentTargetPosition = target;
             currentMaxSpeed = controller.walkSpeed;
 
-            // Agregar evasión de obstáculos también en la fase de regreso
-            Vector3 seekForce = seekBehavior.CalculateSteering(this);
-            Vector3 avoidForce = obstacleBehavior.CalculateSteering(this);
+            // Dirección base hacia el waypoint
+            Vector3 dirToTarget = (target - transform.position).normalized * controller.walkSpeed;
 
-            // Usar un peso posiblemente menor para la evasión durante el regreso
-            Vector3 combinedForce = seekForce + avoidForce * (obstacleAvoidanceWeight * 0.7f);
+            // Obtener fuerza de evasión
+            Vector3 avoidForce = obstacleAvoidance.Avoid();
+
+            // Combinar fuerzas
+            Vector3 combinedForce = dirToTarget + avoidForce;
+
             ApplySteering(combinedForce, controller.walkSpeed);
         }
     }
@@ -172,13 +167,14 @@ public class EnemySteering : MonoBehaviour
     {
         goingForward = false;
 
-        // Usar comportamientos para huir y evitar obstáculos
-        Vector3 fleeForce = evadeBehavior.CalculateSteering(this);
-        Vector3 seekForce = seekBehavior.CalculateSteering(this);
-        Vector3 avoidForce = obstacleBehavior.CalculateSteering(this);
+        // Dirección hacia el punto de inicio
+        Vector3 dirToStart = (startPoint.position - transform.position).normalized * controller.runSpeed;
 
-        // Combinar fuerzas (60% seek al punto A, 20% evade del jugador, 20% obstacle avoidance)
-        Vector3 combinedForce = (seekForce * 0.6f) + (fleeForce * 0.2f) + (avoidForce * 0.2f);
+        // Obtener fuerza de evasión
+        Vector3 avoidForce = obstacleAvoidance.Avoid();
+
+        // Combinar fuerzas
+        Vector3 combinedForce = dirToStart + avoidForce;
 
         ApplySteering(combinedForce, controller.runSpeed);
     }
