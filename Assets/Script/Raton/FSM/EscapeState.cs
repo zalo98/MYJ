@@ -16,7 +16,7 @@ public class EscapeState : MonoBehaviour, IEnemyState
         controller.Steering.ReturnToStart();
 
         // Si llega al punto A, volver a patrullar
-        if (controller.Steering.HasReachedCurrentTarget())
+        if (controller.WaypointSystem.HasReachedCurrentTarget(controller.transform.position))
         {
             controller.StateMachine.ChangeState(controller.PatrolState);
         }
@@ -25,6 +25,6 @@ public class EscapeState : MonoBehaviour, IEnemyState
     public void ExitState(EnemyController controller)
     {
         // Reiniciar el steering al estado inicial
-        controller.Steering.ResetToStart();
+        controller.WaypointSystem.ResetToStart();
     }
 }

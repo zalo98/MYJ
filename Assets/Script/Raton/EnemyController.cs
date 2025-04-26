@@ -6,6 +6,7 @@ public class EnemyController : MonoBehaviour
     [HideInInspector] public EnemyStateMachine StateMachine;
     [HideInInspector] public EnemyLineOfSight LineOfSight;
     [HideInInspector] public EnemySteering Steering;
+    [HideInInspector] public WaypointSystem WaypointSystem;
 
     // Referencias a estados
     [HideInInspector] public IEnemyState PatrolState;
@@ -34,6 +35,8 @@ public class EnemyController : MonoBehaviour
         PatrolState = GetComponent<PatrolState>();
         EscapingState = GetComponent<EscapeState>();
         LookingState = GetComponent<LookingState>();
+
+        WaypointSystem = GetComponent<WaypointSystem>();
 
         // Verificar que todos los componentes necesarios existen
         if (StateMachine == null || LineOfSight == null || Steering == null || EnemyAnimator == null)

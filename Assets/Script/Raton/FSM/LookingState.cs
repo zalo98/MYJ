@@ -75,7 +75,7 @@ public class LookingState : MonoBehaviour, IEnemyState
         }
 
         // Volver a patrullar
-        controller.Steering.MoveToNextTarget();
+        controller.WaypointSystem.MoveToNextTarget();
         controller.StateMachine.ChangeState(controller.PatrolState);
     }
 }
