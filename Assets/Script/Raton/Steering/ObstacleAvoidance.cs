@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 
 public class ObstacleAvoidance : MonoBehaviour
 {
-    [SerializeField] float detectionRange;
+    [SerializeField] public float detectionRange;
     [SerializeField] float avoidForce;
     [SerializeField] LayerMask obstacleMask;
     public Vector3 Avoid()

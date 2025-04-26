@@ -23,7 +23,7 @@ public class PatrolState : MonoBehaviour, IEnemyState
         controller.Steering.FollowPath();
 
         // Revisar si ha llegado al punto objetivo actual
-        if (controller.Steering.HasReachedCurrentTarget())
+        if (controller.WaypointSystem.HasReachedCurrentTarget(controller.transform.position))
         {
             // Decidir aleatoriamente si mirar alrededor
             if (Random.value < 0.2f) // 20% de probabilidad
@@ -33,7 +33,7 @@ public class PatrolState : MonoBehaviour, IEnemyState
             else
             {
                 // Avanzar al siguiente punto
-                controller.Steering.MoveToNextTarget();
+                controller.WaypointSystem.MoveToNextTarget();
             }
         }
     }
