@@ -32,8 +32,6 @@ public class EnemySteering : MonoBehaviour
 
     public void Initialize()
     {
-        Debug.Log("EnemySteering: Inicializando");
-
         controller = GetComponent<EnemyController>();
         rb = GetComponent<Rigidbody>();
         waypointSystem = GetComponent<WaypointSystem>();
@@ -97,8 +95,8 @@ public class EnemySteering : MonoBehaviour
 
             ApplySteering(combinedForce, controller.runSpeed);
 
-            // Verificar si ha llegado al punto de destino actual
-            if (waypointSystem.HasReachedCurrentTarget(transform.position))
+            // Verificar si ha llegado al punto de destino de ESCAPE actual
+            if (waypointSystem.HasReachedEscapeTarget(transform.position))
             {
                 // Avanzar al siguiente punto en la ruta de escape
                 if (waypointSystem.MoveToNextEscapePoint())
