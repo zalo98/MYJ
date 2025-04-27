@@ -2046,7 +2046,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2119775930974504096, guid: c708a3b79cd542b42bbfedb17e213bc1, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18
+      value: -45.3
       objectReference: {fileID: 0}
     - target: {fileID: 2119775930974504096, guid: c708a3b79cd542b42bbfedb17e213bc1, type: 3}
       propertyPath: m_LocalPosition.y
@@ -2054,7 +2054,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2119775930974504096, guid: c708a3b79cd542b42bbfedb17e213bc1, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.1
+      value: -40.1
       objectReference: {fileID: 0}
     - target: {fileID: 2119775930974504096, guid: c708a3b79cd542b42bbfedb17e213bc1, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2739,13 +2739,22 @@ PrefabInstance:
       addedObject: {fileID: 1900916089}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1900916087}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 1900916088}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1900916086}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1900916096}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1900916098}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1900916102}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1900916087}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1900916091}
@@ -2764,12 +2773,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1900916099}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1900916098}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1900916096}
   m_SourcePrefab: {fileID: 100100000, guid: 9d77cfbdf93e81b4cb87a43cae70ad08, type: 3}
 --- !u!1 &1900916082 stripped
 GameObject:
@@ -2842,18 +2845,8 @@ MonoBehaviour:
   currentTargetPosition: {x: 0, y: 0, z: 0}
   currentMaxSpeed: 0
   lastTargetPosition: {x: 0, y: 0, z: 0}
-  startPoint: {fileID: 2141723221}
-  endPoint: {fileID: 782390846}
-  waypoints:
-  - {fileID: 1417746695}
-  - {fileID: 425919237}
   maxSteeringForce: 5
-  arrivalRadius: 1
-  obstacleDetectionRadius: 7
   obstacleAvoidanceWeight: 1.5
-  obstacleLayer:
-    serializedVersion: 2
-    m_Bits: 8
 --- !u!114 &1900916087
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2898,6 +2891,7 @@ MonoBehaviour:
   StateMachine: {fileID: 0}
   LineOfSight: {fileID: 0}
   Steering: {fileID: 0}
+  WaypointSystem: {fileID: 0}
   PlayerTransform: {fileID: 0}
   EnemyAnimator: {fileID: 0}
   walkSpeed: 2
@@ -3028,6 +3022,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63bd4f5a50d67a2469df0b761beb2598, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1900916102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900916082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b5917b5abf64fe4093eeafec5bd532a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startPoint: {fileID: 2141723221}
+  endPoint: {fileID: 782390846}
+  waypoints:
+  - {fileID: 2141723221}
+  - {fileID: 1417746695}
+  - {fileID: 425919237}
+  - {fileID: 782390846}
+  arrivalRadius: 0.5
 --- !u!1 &2093655145
 GameObject:
   m_ObjectHideFlags: 0

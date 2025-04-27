@@ -95,21 +95,23 @@ public class WaypointSystem : MonoBehaviour
     {
         returningByPath = true;
         escapeWaypointIndex = DetermineClosestPreviousWaypoint();
-        Debug.Log("Iniciando escape, waypoint índice: " + escapeWaypointIndex);
     }
 
-    // Avanzar al siguiente punto de la ruta de escape
-    // Devuelve true si ha terminado de escapar (llegado al inicio)
     public bool MoveToNextEscapePoint()
     {
         escapeWaypointIndex--;
 
-        // Si ya pasamos todos los waypoints y llegamos al punto inicial
-        if (escapeWaypointIndex < 0 && Vector3.Distance(transform.position, startPoint.position) <= arrivalRadius)
+        // Si ya no hay más waypoints para el escape
+        if (escapeWaypointIndex < 0)
         {
-            returningByPath = false;
-            Debug.Log("Escape completado");
-            return true;
+            // Si estamos lo suficientemente cerca del punto inicial
+            float distanceToStart = Vector3.Distance(transform.position, startPoint.position);
+            if (distanceToStart <= arrivalRadius)
+            {
+                returningByPath = false;
+                Debug.Log("Escape completado");
+                return true;
+            }
         }
 
         return false;
@@ -141,6 +143,14 @@ public class WaypointSystem : MonoBehaviour
 
         // Si estaba camino hacia adelante, usar el índice actual - 1
         return Mathf.Max(0, currentWaypointIndex - 1);
+    }
+
+    // Verificar si ha llegado al punto de destino de escape actual
+    public bool HasReachedEscapeTarget(Vector3 position)
+    {
+        Vector3 target = GetEscapeTargetPosition();
+        float distance = Vector3.Distance(position, target);
+        return distance <= arrivalRadius;
     }
 
     // Para visualización de la ruta en el editor
