@@ -14,6 +14,8 @@ public class EnemyController : MonoBehaviour
     [HideInInspector] public State AlertState;
     [HideInInspector] public State AttackState;
     [HideInInspector] public State EscapeState;
+    [HideInInspector] public State EnemySeek;
+    [HideInInspector] public State EnemylookingState;
     [HideInInspector] public State MousePatrolState;
     [HideInInspector] public State MouseLookingState;
     [HideInInspector] public State MouseEscapeState;
@@ -59,6 +61,7 @@ public class EnemyController : MonoBehaviour
         AlertState = new AlertState(this, StateMachine);
         AttackState = new AttackState(this, StateMachine);
         EscapeState = new EscapeState(this, StateMachine);
+        EnemylookingState = new EnemyLookingState(this, StateMachine);
 
         MousePatrolState = new MousePatrolState(this, StateMachine);
         MouseLookingState = new LookingState(this, StateMachine);
@@ -67,6 +70,7 @@ public class EnemyController : MonoBehaviour
         // Añadir las transiciones entre los estados
         PatrolState.AddTransition(StateEnum.EnemyAlert, AlertState);
         PatrolState.AddTransition(StateEnum.Attack, AttackState);
+        PatrolState.AddTransition(StateEnum.EnemyLookingState, EnemylookingState);
         AlertState.AddTransition(StateEnum.EnemyPatrol, PatrolState);
         AlertState.AddTransition(StateEnum.Attack, AttackState);
         AttackState.AddTransition(StateEnum.EnemyEscape, EscapeState);
