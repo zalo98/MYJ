@@ -17,43 +17,53 @@ public class EnemyController : MonoBehaviour
     [HideInInspector] public Transform PlayerTransform;
     [HideInInspector] public Animator EnemyAnimator;
 
+    [HideInInspector] public AudioSource audioSource;
+
     // Configuración general
     [Header("Configuración General")]
-    public float walkSpeed = 2.0f;
-    public float runSpeed = 5.0f;
-    public float rotationSpeed = 120.0f;
+    public float walkSpeed;
+    public float runSpeed;
+    public float rotationSpeed;
+    public AudioClip escapeSound;
 
     void Awake()
     {
         // Obtener referencias a los componentes
-        StateMachine = GetComponent<EnemyStateMachine>();
         LineOfSight = GetComponent<EnemyLineOfSight>();
         Steering = GetComponent<EnemySteering>();
         EnemyAnimator = GetComponent<Animator>();
-
-        // Obtener referencias a los estados
-        PatrolState = GetComponent<PatrolState>();
-        EscapingState = GetComponent<EscapeState>();
-        LookingState = GetComponent<LookingState>();
-
         WaypointSystem = GetComponent<WaypointSystem>();
+        audioSource = GetComponent<AudioSource>();
 
-        // Verificar que todos los componentes necesarios existen
-        if (StateMachine == null || LineOfSight == null || Steering == null || EnemyAnimator == null)
-            Debug.LogError("Falta algún componente necesario en EnemyController");
+        //audioSource.loop = true;
 
-        if (PatrolState == null || EscapingState == null || LookingState == null)
-            Debug.LogError("Falta algún componente de estado en EnemyController");
+        // Crear la máquina de estados
+        StateMachine = new EnemyStateMachine();
+
+        // Crear los estados
+        PatrolState = new PatrolState();
+        EscapingState = new EscapeState();
+        LookingState = new LookingState(this); // Pasamos 'this' como host para coroutines
     }
 
     void Start()
     {
         // Encontrar al jugador
-        PlayerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            PlayerTransform = player.transform;
+        }
 
         // Inicializar componentes
         StateMachine.Initialize(this);
         LineOfSight.Initialize();
         Steering.Initialize();
+    }
+
+    void Update()
+    {
+        // Actualizar la máquina de estados
+        StateMachine.UpdateState();
     }
 }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PatrolState : MonoBehaviour, IEnemyState
+public class PatrolState : IEnemyState
 {
     public void EnterState(EnemyController controller)
     {

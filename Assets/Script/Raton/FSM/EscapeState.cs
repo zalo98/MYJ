@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EscapeState : MonoBehaviour, IEnemyState
+public class EscapeState : IEnemyState
 {
     public void EnterState(EnemyController controller)
     {
@@ -8,6 +8,9 @@ public class EscapeState : MonoBehaviour, IEnemyState
         controller.EnemyAnimator.SetBool("IsWalking", false);
         controller.EnemyAnimator.SetBool("IsRunning", true);
         controller.EnemyAnimator.SetBool("IsLooking", false);
+
+        controller.audioSource.clip = controller.escapeSound;
+        controller.audioSource.Play();
     }
 
     public void UpdateState(EnemyController controller)
@@ -26,5 +29,6 @@ public class EscapeState : MonoBehaviour, IEnemyState
     {
         // Reiniciar el steering al estado inicial
         controller.WaypointSystem.ResetToStart();
+        controller.audioSource.Stop();
     }
 }

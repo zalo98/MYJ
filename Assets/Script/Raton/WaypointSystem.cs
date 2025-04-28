@@ -22,11 +22,7 @@ public class WaypointSystem : MonoBehaviour
     {
         // Verificar puntos de ruta
         if (startPoint == null || endPoint == null)
-            Debug.LogError("Puntos de inicio y final no asignados en WaypointSystem");
-
-        // Posicionar al enemigo en el punto inicial (si está en Start)
-        if (startPoint != null)
-            transform.position = startPoint.position;
+            Debug.LogError("Waypoints no asignados en WaypointSystem");
     }
 
     // Obtener la posición del objetivo actual en modo normal

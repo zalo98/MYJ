@@ -2,7 +2,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using System.Collections;
 
-public class EnemyStateMachine : MonoBehaviour
+public class EnemyStateMachine
 {
     private EnemyController controller;
     private IEnemyState currentState;
@@ -14,7 +14,7 @@ public class EnemyStateMachine : MonoBehaviour
         ChangeState(controller.PatrolState);
     }
 
-    public void Update()
+    public void UpdateState()
     {
         if (currentState != null)
             currentState.UpdateState(controller);

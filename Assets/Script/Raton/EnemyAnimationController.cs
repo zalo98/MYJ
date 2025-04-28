@@ -53,10 +53,6 @@ public class EnemyAnimationController : MonoBehaviour
                 SetRunning(false);
                 SetLooking(true);
                 break;
-
-            default:
-                Debug.LogWarning("Tipo de animación desconocido: " + animationType);
-                break;
         }
     }
 }
