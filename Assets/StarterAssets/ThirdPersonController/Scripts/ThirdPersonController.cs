@@ -12,7 +12,7 @@ namespace StarterAssets
 #if ENABLE_INPUT_SYSTEM 
     [RequireComponent(typeof(PlayerInput))]
 #endif
-    public class ThirdPersonController : MonoBehaviour
+    public class ThirdPersonController : MonoBehaviour, ITarget
     {
         [Header("Player")]
         [Tooltip("Move speed of the character in m/s")]
@@ -188,6 +188,11 @@ namespace StarterAssets
             {
                 _animator.SetBool(_animIDGrounded, Grounded);
             }
+        }
+        
+        public Transform GetTransform
+        {
+            get { return transform; }
         }
 
         private void CameraRotation()
