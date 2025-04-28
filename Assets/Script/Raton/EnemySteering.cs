@@ -9,7 +9,7 @@ public class EnemySteering : MonoBehaviour
 
     // Comportamientos de steering (cambiados a la nueva interfaz)
     private ISteering seekBehavior;
-    private ISteering fleeBehavior;
+    private Flee fleeBehavior;  // Cambiar de ISteering a Flee
     private ObstacleAvoidance obstacleAvoidance;
 
     // Transform temporal para el comportamiento Seek
@@ -43,7 +43,7 @@ public class EnemySteering : MonoBehaviour
 
         // Inicializar nuevos comportamientos de steering
         seekBehavior = new Seek(rb, targetTransform, controller.walkSpeed);
-        fleeBehavior = new Flee(rb, controller.PlayerTransform, controller.runSpeed);
+        fleeBehavior = new Flee(rb, controller.PlayerTransform, controller.runSpeed);  // Asegurarnos de que estamos usando Flee y no ISteering
 
         // Verificar que exista ObstacleAvoidance
         if (obstacleAvoidance == null)
@@ -151,11 +151,13 @@ public class EnemySteering : MonoBehaviour
         if (waypointSystem != null)
         {
             waypointSystem.ResetToStart();
-            escaping = false;  // Deja de escapar y vuelve a patrullar
+            escaping = false;
         }
         else
         {
             Debug.LogError("No se pudo encontrar WaypointSystem al intentar regresar al inicio.");
         }
     }
+    
+    public Flee FleeBehavior => fleeBehavior;
 }

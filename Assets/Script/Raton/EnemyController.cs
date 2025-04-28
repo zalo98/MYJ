@@ -14,6 +14,9 @@ public class EnemyController : MonoBehaviour
     [HideInInspector] public State AlertState;
     [HideInInspector] public State AttackState;
     [HideInInspector] public State EscapeState;
+    [HideInInspector] public State MousePatrolState;
+    [HideInInspector] public State MouseLookingState;
+    [HideInInspector] public State MouseEscapeState;
 
     // Referencias a componentes internos
     [HideInInspector] public Animator EnemyAnimator;
@@ -28,7 +31,7 @@ public class EnemyController : MonoBehaviour
     public EnemyVision enemyVision;
     public ObstacleAvoidance obstacleAvoidance;
 
-    void Awake()
+    private void Awake()
     {
         if (enemyVision == null)
         {
@@ -39,7 +42,7 @@ public class EnemyController : MonoBehaviour
         EnemyAnimator = GetComponent<Animator>();
         WaypointSystem = GetComponent<WaypointSystem>();
         audioSource = GetComponent<AudioSource>();
-        
+
         if (Steering != null)
         {
             Steering.Initialize();
@@ -48,13 +51,20 @@ public class EnemyController : MonoBehaviour
         {
             Debug.LogError("EnemySteering no encontrado en el objeto.");
         }
-        
+
         StateMachine = new FSM();
+        
+        // Inicialización de los estados
         PatrolState = new PatrolState(this, StateMachine);
         AlertState = new AlertState(this, StateMachine);
         AttackState = new AttackState(this, StateMachine);
         EscapeState = new EscapeState(this, StateMachine);
+
+        MousePatrolState = new MousePatrolState(this, StateMachine);
+        MouseLookingState = new LookingState(this, StateMachine);
+        MouseEscapeState = new MouseEscapeState(this, StateMachine);
         
+        // Añadir las transiciones entre los estados
         PatrolState.AddTransition(StateEnum.EnemyAlert, AlertState);
         PatrolState.AddTransition(StateEnum.Attack, AttackState);
         AlertState.AddTransition(StateEnum.EnemyPatrol, PatrolState);
@@ -62,9 +72,17 @@ public class EnemyController : MonoBehaviour
         AttackState.AddTransition(StateEnum.EnemyEscape, EscapeState);
         AttackState.AddTransition(StateEnum.EnemyAlert, AlertState);
         EscapeState.AddTransition(StateEnum.EnemyAlert, AlertState);
+
+        // Transiciones para los estados del ratón
+        MousePatrolState.AddTransition(StateEnum.MouseLookingState, MouseLookingState);
+        MousePatrolState.AddTransition(StateEnum.MouseEscapeState, MouseEscapeState);
+        MouseLookingState.AddTransition(StateEnum.MouseEscapeState, MouseEscapeState);
+        MouseLookingState.AddTransition(StateEnum.MousePatrolState, MousePatrolState);
+        MouseEscapeState.AddTransition(StateEnum.MousePatrolState, MousePatrolState);
+        MouseEscapeState.AddTransition(StateEnum.MouseLookingState, MouseLookingState);
     }
 
-    void Start()
+    private void Start()
     {
         PlayerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         
@@ -81,11 +99,11 @@ public class EnemyController : MonoBehaviour
         }
         else
         {
-            StateMachine.SetInit(PatrolState);
+            StateMachine.SetInit(MousePatrolState);
         }
     }
 
-    void Update()
+    private void Update()
     {
         enemyVision.UpdateDetection();
         

@@ -6,5 +6,7 @@ public enum StateEnum
     EnemyAlert,
     Attack,
     EnemyEscape,
-    MouseLookingState
+    MousePatrolState,
+    MouseLookingState,
+    MouseEscapeState
 }
