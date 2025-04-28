@@ -58,7 +58,7 @@ public class EnemySteering : MonoBehaviour
 
         // Verificar que exista WaypointSystem
         if (waypointSystem == null)
-            Debug.LogError("No se encontr� componente WaypointSystem");
+            Debug.LogError("No se encontró componente WaypointSystem");
     }
 
     void ConfigureRigidbody()
@@ -74,7 +74,7 @@ public class EnemySteering : MonoBehaviour
         currentVelocity = rb.linearVelocity;
     }
 
-    // M�todo para seguir la ruta
+    // Método para seguir la ruta
     public void FollowPath()
     {
         if (escaping)
@@ -84,13 +84,13 @@ public class EnemySteering : MonoBehaviour
             currentTargetPosition = target;
             currentMaxSpeed = controller.runSpeed;
 
-            // Actualizar posici�n del objetivo para Seek
+            // Actualizar posición del objetivo para Seek
             targetTransform.position = target;
 
             // Usar fleeBehavior para alejarse del jugador, pero dirigirse hacia el punto de escape
             Vector3 steeringForce = seekBehavior.MoveDirection();
 
-            // Obtener fuerza de evasi�n
+            // Obtener fuerza de evasión
             Vector3 avoidForce = obstacleAvoidance.Avoid();
 
             // Combinar fuerzas
@@ -117,90 +117,45 @@ public class EnemySteering : MonoBehaviour
             currentTargetPosition = target;
             currentMaxSpeed = controller.walkSpeed;
 
-            // Actualizar posici�n del objetivo para Seek
+            // Actualizar posición del objetivo para Seek
             targetTransform.position = target;
 
             // Usar seekBehavior para seguir el camino
             Vector3 steeringForce = seekBehavior.MoveDirection();
 
-            // Obtener fuerza de evasi�n
+            // Obtener fuerza de evasión
             Vector3 avoidForce = obstacleAvoidance.Avoid();
 
             // Combinar fuerzas
             Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
 
             ApplySteering(combinedForce, controller.walkSpeed);
-
-            // Verificar si ha llegado al punto de destino actual
-            if (waypointSystem.HasReachedCurrentTarget(transform.position))
-            {
-                waypointSystem.MoveToNextTarget();
-            }
         }
     }
 
-    // M�todo para huir
+    // Aplicar el steering calculado
+    private void ApplySteering(Vector3 steeringForce, float maxSpeed)
+    {
+        steeringForce = Vector3.ClampMagnitude(steeringForce, maxSteeringForce);
+
+        rb.AddForce(steeringForce);
+        if (rb.linearVelocity.magnitude > maxSpeed)
+        {
+            rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
+        }
+    }
+
+    // Método para regresar al punto inicial de la ruta
     public void ReturnToStart()
     {
-        if (!escaping)
+        if (waypointSystem != null)
         {
-            escaping = true;
-            waypointSystem.StartEscapeRoute();
+            waypointSystem.ResetToStart();
+            escaping = false;  // Deja de escapar y vuelve a patrullar
         }
-
-        // El resto de la l�gica ya est� en FollowPath()
-        FollowPath();
-    }
-
-    // Aplicar el steering resultante al Rigidbody
-    void ApplySteering(Vector3 steering, float maxSpeed)
-    {
-        // Limitar la fuerza m�xima
-        steering = Vector3.ClampMagnitude(steering, maxSteeringForce);
-
-        // Aplicar fuerza
-        rb.AddForce(steering, ForceMode.Acceleration);
-
-        // Limitar velocidad m�xima
-        if (rb.linearVelocity.magnitude > maxSpeed)
-            rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
-
-        // Orientar al enemigo en la direcci�n del movimiento
-        if (rb.linearVelocity.magnitude > 0.1f)
+        else
         {
-            Vector3 lookDirection = rb.linearVelocity;
-            lookDirection.y = 0;
-
-            if (lookDirection.magnitude > 0.1f)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
-                transform.rotation = Quaternion.RotateTowards(
-                    transform.rotation,
-                    targetRotation,
-                    controller.rotationSpeed * Time.deltaTime
-                );
-            }
+            Debug.LogError("No se pudo encontrar WaypointSystem al intentar regresar al inicio.");
         }
-    }
-
-    public bool HasReachedCurrentTarget()
-    {
-        return waypointSystem.HasReachedCurrentTarget(transform.position);
-    }
-
-    public void MoveToNextTarget()
-    {
-        waypointSystem.MoveToNextTarget();
-    }
-
-    public void ResetToStart()
-    {
-        waypointSystem.ResetToStart();
-    }
-
-    // Para obstacleDetectionRadius
-    public float obstacleDetectionRadius
-    {
-        get { return obstacleAvoidance ? obstacleAvoidance.detectionRange : 3f; }
     }
 }

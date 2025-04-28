@@ -1,34 +1,48 @@
 using UnityEngine;
 
-public class EscapeState : IEnemyState
+public class EscapeState : State
 {
-    public void EnterState(EnemyController controller)
-    {
-        // Configurar animación
-        controller.EnemyAnimator.SetBool("IsWalking", false);
-        controller.EnemyAnimator.SetBool("IsRunning", true);
-        controller.EnemyAnimator.SetBool("IsLooking", false);
+    private EnemyController enemyController;
 
-        controller.audioSource.clip = controller.escapeSound;
-        controller.audioSource.Play();
+    public EscapeState(EnemyController controller, FSM fsm) : base(fsm)
+    {
+        enemyController = controller;
     }
 
-    public void UpdateState(EnemyController controller)
+    public override void Awake()
     {
-        // Volver al punto de inicio A
-        controller.Steering.ReturnToStart();
+        
+    }
 
-        // Si llega al punto A, volver a patrullar
-        if (controller.WaypointSystem.HasReachedCurrentTarget(controller.transform.position))
+    public override void Execute()
+    {
+        EscapeBehavior();
+    }
+
+    private void EscapeBehavior()
+    {
+        enemyController.EnemyAnimator.SetBool("IsWalking", false);
+        enemyController.EnemyAnimator.SetBool("IsRunning", true);
+        enemyController.EnemyAnimator.SetBool("IsLooking", false);
+        
+        if (!enemyController.audioSource.isPlaying)
         {
-            controller.StateMachine.ChangeState(controller.PatrolState);
+            enemyController.audioSource.clip = enemyController.escapeSound;
+            enemyController.audioSource.Play();
+        }
+        
+        enemyController.Steering.ReturnToStart();
+        
+        if (enemyController.WaypointSystem.HasReachedCurrentTarget(enemyController.transform.position))
+        {
+            enemyController.StateMachine.Transition(StateEnum.EnemyPatrol);
         }
     }
 
-    public void ExitState(EnemyController controller)
+    public override void Sleep()
     {
-        // Reiniciar el steering al estado inicial
-        controller.WaypointSystem.ResetToStart();
-        controller.audioSource.Stop();
+        enemyController.WaypointSystem.ResetToStart();
+        
+        enemyController.audioSource.Stop();
     }
 }

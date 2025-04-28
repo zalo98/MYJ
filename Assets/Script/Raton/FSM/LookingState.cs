@@ -1,19 +1,20 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
-public class LookingState : IEnemyState
+public class LookingState : State
 {
+    private EnemyController controller;
     private Coroutine lookingCoroutine;
     private MonoBehaviour coroutineHost; // Para poder iniciar coroutines
 
-    public LookingState(MonoBehaviour host)
+    public LookingState(MonoBehaviour host, FSM fsm) : base(fsm)
     {
         coroutineHost = host;
     }
 
-    public void EnterState(EnemyController controller)
+    public override void Awake()
     {
-        // Configurar animaciÛn
+        // Configurar la animaci√≥n al entrar al estado
         controller.EnemyAnimator.SetBool("IsWalking", false);
         controller.EnemyAnimator.SetBool("IsRunning", false);
         controller.EnemyAnimator.SetBool("IsLooking", true);
@@ -22,20 +23,21 @@ public class LookingState : IEnemyState
         lookingCoroutine = coroutineHost.StartCoroutine(LookAroundCoroutine(controller));
     }
 
-    public void UpdateState(EnemyController controller)
+    public override void Execute()
     {
-        // Comprobar si el jugador est· visible
-        if (controller.LineOfSight.CanSeePlayer())
+        // Comprobar si el jugador est√° visible mediante visi√≥n directa o perif√©rica
+        if (controller.enemyVision.HasDirectDetection || (controller.enemyVision.usePeripheralVision && controller.enemyVision.HasPeripheralDetection))
         {
-            controller.StateMachine.ChangeState(controller.EscapingState);
+            // Si se detecta al jugador, cambiar al estado de escapar
+            controller.StateMachine.Transition(StateEnum.EnemyEscape);
             return;
         }
-        // La rotaciÛn y animaciÛn se manejan en la corrutina
+        // La rotaci√≥n y animaci√≥n se manejan en la corrutina
     }
 
-    public void ExitState(EnemyController controller)
+    public override void Sleep()
     {
-        // Detener la corrutina si est· en progreso
+        // Detener la corrutina si est√° en progreso
         if (lookingCoroutine != null)
             coroutineHost.StopCoroutine(lookingCoroutine);
     }
@@ -76,6 +78,6 @@ public class LookingState : IEnemyState
 
         // Volver a patrullar
         controller.WaypointSystem.MoveToNextTarget();
-        controller.StateMachine.ChangeState(controller.PatrolState);
+        controller.StateMachine.Transition(StateEnum.EnemyPatrol);
     }
 }

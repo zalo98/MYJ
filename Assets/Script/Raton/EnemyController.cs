@@ -3,67 +3,92 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     // Referencias a componentes
-    [HideInInspector] public EnemyStateMachine StateMachine;
-    [HideInInspector] public EnemyLineOfSight LineOfSight;
+    [HideInInspector] public FSM StateMachine;
+    [HideInInspector] public ILineOfSight LineOfSight;
     [HideInInspector] public EnemySteering Steering;
     [HideInInspector] public WaypointSystem WaypointSystem;
+    [HideInInspector] public Transform PlayerTransform;
 
     // Referencias a estados
-    [HideInInspector] public IEnemyState PatrolState;
-    [HideInInspector] public IEnemyState EscapingState;
-    [HideInInspector] public IEnemyState LookingState;
+    [HideInInspector] public State PatrolState;
+    [HideInInspector] public State AlertState;
+    [HideInInspector] public State AttackState;
+    [HideInInspector] public State EscapeState;
 
     // Referencias a componentes internos
-    [HideInInspector] public Transform PlayerTransform;
     [HideInInspector] public Animator EnemyAnimator;
-
     [HideInInspector] public AudioSource audioSource;
 
-    // Configuración general
-    [Header("Configuración General")]
+    // ConfiguraciÃ³n general
+    [Header("ConfiguraciÃ³n General")]
     public float walkSpeed;
     public float runSpeed;
     public float rotationSpeed;
     public AudioClip escapeSound;
+    public EnemyVision enemyVision;
+    public ObstacleAvoidance obstacleAvoidance;
 
     void Awake()
     {
-        // Obtener referencias a los componentes
-        LineOfSight = GetComponent<EnemyLineOfSight>();
+        if (enemyVision == null)
+        {
+            enemyVision = GetComponent<EnemyVision>();
+        }
+        LineOfSight = GetComponent<ILineOfSight>();
         Steering = GetComponent<EnemySteering>();
         EnemyAnimator = GetComponent<Animator>();
         WaypointSystem = GetComponent<WaypointSystem>();
         audioSource = GetComponent<AudioSource>();
-
-        //audioSource.loop = true;
-
-        // Crear la máquina de estados
-        StateMachine = new EnemyStateMachine();
-
-        // Crear los estados
-        PatrolState = new PatrolState();
-        EscapingState = new EscapeState();
-        LookingState = new LookingState(this); // Pasamos 'this' como host para coroutines
+        
+        if (Steering != null)
+        {
+            Steering.Initialize();
+        }
+        else
+        {
+            Debug.LogError("EnemySteering no encontrado en el objeto.");
+        }
+        
+        StateMachine = new FSM();
+        PatrolState = new PatrolState(this, StateMachine);
+        AlertState = new AlertState(this, StateMachine);
+        AttackState = new AttackState(this, StateMachine);
+        EscapeState = new EscapeState(this, StateMachine);
+        
+        PatrolState.AddTransition(StateEnum.EnemyAlert, AlertState);
+        PatrolState.AddTransition(StateEnum.Attack, AttackState);
+        AlertState.AddTransition(StateEnum.EnemyPatrol, PatrolState);
+        AlertState.AddTransition(StateEnum.Attack, AttackState);
+        AttackState.AddTransition(StateEnum.EnemyEscape, EscapeState);
+        AttackState.AddTransition(StateEnum.EnemyAlert, AlertState);
+        EscapeState.AddTransition(StateEnum.EnemyAlert, AlertState);
     }
 
     void Start()
     {
-        // Encontrar al jugador
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
+        PlayerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        
+        if (Steering != null)
         {
-            PlayerTransform = player.transform;
+            Steering.Initialize();
         }
-
-        // Inicializar componentes
-        StateMachine.Initialize(this);
-        LineOfSight.Initialize();
-        Steering.Initialize();
+        
+        enemyVision.UpdateDetection();
+        
+        if (enemyVision.usePeripheralVision)
+        {
+            StateMachine.SetInit(PatrolState);
+        }
+        else
+        {
+            StateMachine.SetInit(PatrolState);
+        }
     }
 
     void Update()
     {
-        // Actualizar la máquina de estados
-        StateMachine.UpdateState();
+        enemyVision.UpdateDetection();
+        
+        StateMachine.Update();
     }
 }

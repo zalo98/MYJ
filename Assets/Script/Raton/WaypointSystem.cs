@@ -61,29 +61,30 @@ public class WaypointSystem : MonoBehaviour
         return distance <= arrivalRadius;
     }
 
-    // Avanzar al siguiente punto de la ruta normal
     public void MoveToNextTarget()
     {
-        // Si llegó al punto B
-        if (!reachedEndPoint && currentWaypointIndex >= waypoints.Length)
+        if (!reachedEndPoint)
         {
-            reachedEndPoint = true;
-            currentWaypointIndex = waypoints.Length - 1;
-            waypointDirection = -1;
-            return;
+            if (currentWaypointIndex < waypoints.Length - 1)
+            {
+                currentWaypointIndex++;
+            }
+            else
+            {
+                reachedEndPoint = true;
+            }
         }
-
-        // Si llegó al punto A después de estar en B
-        if (reachedEndPoint && currentWaypointIndex < 0)
+        else
         {
-            reachedEndPoint = false;
-            currentWaypointIndex = 0;
-            waypointDirection = 1;
-            return;
+            if (currentWaypointIndex > 0)
+            {
+                currentWaypointIndex--;
+            }
+            else
+            {
+                reachedEndPoint = false;
+            }
         }
-
-        // Avance normal
-        currentWaypointIndex += waypointDirection;
     }
 
     // Iniciar ruta de escape
