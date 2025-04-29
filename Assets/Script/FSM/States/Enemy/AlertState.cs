@@ -7,8 +7,8 @@ public class AlertState : State
     private Transform playerTransform;
     private EnemyVision enemyVision;
 
-    private float alertTimer = 10f;
-    private float currentTime;
+    public float alertTimer = 10f;
+    public float currentTime;
 
     public AlertState(EnemyController controller, FSM fsm) : base(fsm)
     {
@@ -28,7 +28,7 @@ public class AlertState : State
             return;
         }
 
-        decisionTree = new AlertDecisionTree(controller, fsm);
+        decisionTree = new AlertDecisionTree(controller, fsm, this);
         decisionTree.StartAlert();
 
         currentTime = alertTimer;
@@ -36,28 +36,22 @@ public class AlertState : State
 
     public override void Execute()
     {
-        if (enemyVision.HasDirectDetection)
-        {
-            fsm.Transition(StateEnum.Attack);
-            return;
-        }
-
         if (enemyVision.HasPeripheralDetection)
         {
             currentTime = alertTimer;
             Debug.Log("Jugador visto periféricamente, timer reiniciado");
         }
-
-        currentTime -= Time.deltaTime;
-
-        if (currentTime <= 0f)
+        
+        if (decisionTree.currentTarget.HasValue)
         {
-            fsm.Transition(StateEnum.EnemyPatrol);
-            return;
+            currentTime = alertTimer;
         }
-
+    
+        currentTime -= Time.deltaTime;
         decisionTree.Execute();
     }
+
+
 
     public override void Sleep()
     {

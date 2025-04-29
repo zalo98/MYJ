@@ -134,9 +134,21 @@ public class EnemySteering : MonoBehaviour
     public void MoveToPosition(Vector3 target, float speed)
     {
         Vector3 direction = (target - transform.position).normalized;
+        RotateTowards(direction);
         rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
     }
+    
+    private void RotateTowards(Vector3 direction)
+    {
+        direction.y = 0;
 
+        if (direction.sqrMagnitude < 0.01f)
+            return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        Quaternion smoothedRotation = Quaternion.RotateTowards(rb.rotation, targetRotation, 360f * Time.deltaTime);
+        rb.MoveRotation(smoothedRotation);
+    }
 
     private void UpdateMoveToPosition()
     {

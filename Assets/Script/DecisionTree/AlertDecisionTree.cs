@@ -4,18 +4,20 @@ public class AlertDecisionTree
 {
     private readonly EnemyController enemy;
     private readonly FSM fsm;
+    private readonly AlertState alertState;
     private IDecisionNode rootNode;
 
     private float decisionInterval = 2f;
     private float decisionTimer = 0f;
 
     private bool isRotating = false;
-    private Vector3? currentTarget = null;
+    public Vector3? currentTarget = null;
 
-    public AlertDecisionTree(EnemyController enemy, FSM fsm)
+    public AlertDecisionTree(EnemyController enemy, FSM fsm, AlertState alertState)
     {
         this.enemy = enemy;
         this.fsm = fsm;
+        this.alertState = alertState;
     }
 
     public void StartAlert()
@@ -43,12 +45,17 @@ public class AlertDecisionTree
         if (currentTarget.HasValue)
         {
             enemy.Steering.MoveToPosition(currentTarget.Value, enemy.walkSpeed);
+            
+            alertState.currentTime = alertState.alertTimer;
 
             float distance = Vector3.Distance(enemy.transform.position, currentTarget.Value);
             if (distance <= 1f)
             {
                 currentTarget = null;
                 Debug.Log("Llegó a la última posición del jugador");
+                
+                isRotating = true;
+                Debug.Log("Enemigo empieza a rotar alrededor de la posición");
             }
             return;
         }
@@ -72,12 +79,12 @@ public class AlertDecisionTree
         ActionNode atacar = new ActionNode(() => fsm.Transition(StateEnum.Attack));
         ActionNode buscar = new ActionNode(() => AlertLookOrMove());
         ActionNode patrullar = new ActionNode(() => fsm.Transition(StateEnum.EnemyPatrol));
-
-        QuestionNode veAlJugador = new QuestionNode(atacar, buscar, () => enemy.enemyVision.HasDirectDetection);
-        QuestionNode hayUltimaPosicion = new QuestionNode(veAlJugador, patrullar, () => enemy.enemyVision.LastSeenPosition.HasValue);
-
-        rootNode = hayUltimaPosicion;
+        
+        QuestionNode tiempoAgotado = new QuestionNode(patrullar, buscar, () => alertState.currentTime <= 0f);
+        QuestionNode hayUltimaPosicion = new QuestionNode(tiempoAgotado, patrullar, () => enemy.enemyVision.LastSeenPosition.HasValue);
+        rootNode = new QuestionNode(atacar, hayUltimaPosicion, () => enemy.enemyVision.HasDirectDetection);
     }
+
 
     private void AlertLookOrMove()
     {

@@ -56,7 +56,6 @@ public class EnemyController : MonoBehaviour, IInteractable
 
         StateMachine = new FSM();
         
-        // Inicialización de los estados
         PatrolState = new PatrolState(this, StateMachine);
         AlertState = new AlertState(this, StateMachine);
         AttackState = new AttackState(this, StateMachine);
@@ -67,7 +66,6 @@ public class EnemyController : MonoBehaviour, IInteractable
         MouseLookingState = new LookingState(this, StateMachine);
         MouseEscapeState = new MouseEscapeState(this, StateMachine);
         
-        // Añadir las transiciones entre los estados
         PatrolState.AddTransition(StateEnum.EnemyAlert, AlertState);
         PatrolState.AddTransition(StateEnum.Attack, AttackState);
         PatrolState.AddTransition(StateEnum.EnemyLookingState, EnemylookingState);
@@ -76,8 +74,7 @@ public class EnemyController : MonoBehaviour, IInteractable
         AttackState.AddTransition(StateEnum.EnemyEscape, EscapeState);
         AttackState.AddTransition(StateEnum.EnemyAlert, AlertState);
         EscapeState.AddTransition(StateEnum.EnemyAlert, AlertState);
-
-        // Transiciones para los estados del ratón
+        
         MousePatrolState.AddTransition(StateEnum.MouseLookingState, MouseLookingState);
         MousePatrolState.AddTransition(StateEnum.MouseEscapeState, MouseEscapeState);
         MouseLookingState.AddTransition(StateEnum.MouseEscapeState, MouseEscapeState);
@@ -116,24 +113,18 @@ public class EnemyController : MonoBehaviour, IInteractable
 
     public void Interact()
     {
-        // Verificar si tiene el componente CollectibleEnemy
         CollectibleEnemy collectible = GetComponent<CollectibleEnemy>();
 
         if (collectible != null)
         {
-            // Es un enemigo recolectable
             collectible.OnCollected();
-
-            // Destruir el enemigo después de recolectarlo
             Destroy(gameObject);
         }
         else
         {
-            // Es un enemigo normal, no recolectable
             Debug.Log("Este enemigo no es recolectable");
         }
-
-        // Destruir el enemigo
+        
         Destroy(gameObject);
     }
 }
