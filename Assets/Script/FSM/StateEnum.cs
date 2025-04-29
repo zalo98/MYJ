@@ -10,5 +10,9 @@ public enum StateEnum
     EnemyLookingState,
     MousePatrolState,
     MouseLookingState,
-    MouseEscapeState
+    MouseEscapeState,
+    //States del Player
+    PlayerIdle,
+    PlayerWalk,
+    PlayerRun
 }
