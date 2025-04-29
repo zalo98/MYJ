@@ -5,8 +5,6 @@ public class PatrolState : State
     private EnemyController controller;
     private float patrolDelay = 1f;
     private float timeSpentAtWaypoint = 0f;
-    private int patrolCount = 0;
-    private int maxPatrolCount = 2;
 
     public PatrolState(EnemyController controller, FSM fsm) : base(fsm)
     {
@@ -15,7 +13,6 @@ public class PatrolState : State
 
     public override void Awake()
     {
-        patrolCount = 0;
         timeSpentAtWaypoint = 0f;
     }
 
@@ -38,14 +35,6 @@ public class PatrolState : State
 
             if (timeSpentAtWaypoint > patrolDelay)
             {
-                patrolCount++;
-
-                if (patrolCount >= maxPatrolCount)
-                {
-                    controller.StateMachine.Transition(StateEnum.EnemyLookingState);
-                    return;
-                }
-
                 controller.WaypointSystem.MoveToNextTarget();
                 timeSpentAtWaypoint = 0f;
             }
@@ -76,6 +65,6 @@ public class PatrolState : State
 
     public override void Sleep()
     {
-
+        
     }
 }

@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
     private void ConfigureRigidbody()
     {
         rb.constraints = RigidbodyConstraints.FreezeRotation; // Evita que el personaje rote por físicas
-        rb.drag = groundDrag; // Configurar la fricción
+        rb.linearDamping = groundDrag; // Configurar la fricción
     }
 
     private void InitializeFSM()
@@ -91,16 +91,16 @@ public class PlayerController : MonoBehaviour
             // Aplicar movimiento
             float currentSpeed = GetCurrentSpeed();
             Vector3 newVelocity = moveDirection * currentSpeed;
-            newVelocity.y = rb.velocity.y; // Mantener la caída natural por gravedad
-            rb.velocity = newVelocity;
+            newVelocity.y = rb.linearVelocity.y; // Mantener la caída natural por gravedad
+            rb.linearVelocity = newVelocity;
         }
         else
         {
             // Detener movimiento horizontal pero mantener el vertical
-            Vector3 newVelocity = rb.velocity;
+            Vector3 newVelocity = rb.linearVelocity;
             newVelocity.x = 0;
             newVelocity.z = 0;
-            rb.velocity = newVelocity;
+            rb.linearVelocity = newVelocity;
         }
     }
 

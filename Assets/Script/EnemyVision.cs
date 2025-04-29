@@ -14,9 +14,12 @@ public class EnemyVision : MonoBehaviour
     [SerializeField] private LayerMask targetMask;
     [SerializeField] private LayerMask obstacleMask;
 
-    private List<ITarget> directDetected = new List<ITarget>();
+     private List<ITarget> directDetected = new List<ITarget>();
     private List<ITarget> peripheralDetected = new List<ITarget>();
-    
+
+    private Vector3? lastSeenPosition = null;
+    public Vector3? LastSeenPosition => lastSeenPosition;
+
     public bool usePeripheralVision = true;
 
     public bool HasDirectDetection => directDetected.Count > 0;
@@ -24,16 +27,23 @@ public class EnemyVision : MonoBehaviour
 
     public void UpdateDetection()
     {
+        directDetected.Clear();
+        peripheralDetected.Clear();
+        lastSeenPosition = null;
+
         FindDirectTargets();
         if (usePeripheralVision)
-        {
             FindPeripheralTargets();
-        }
+    }
+
+    public bool IsInSight(Transform target)
+    {
+        return directDetected.Exists(t => t.GetTransform == target) ||
+               peripheralDetected.Exists(t => t.GetTransform == target);
     }
 
     private void FindDirectTargets()
     {
-        directDetected.Clear();
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, directRange, targetMask);
 
         foreach (var hitCollider in hitColliders)
@@ -42,13 +52,13 @@ public class EnemyVision : MonoBehaviour
             if (target != null && CheckAngle(target.GetTransform, directFov) && CheckView(target.GetTransform))
             {
                 directDetected.Add(target);
+                lastSeenPosition = target.GetTransform.position;
             }
         }
     }
 
     private void FindPeripheralTargets()
     {
-        peripheralDetected.Clear();
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, peripheralRange, targetMask);
 
         foreach (var hitCollider in hitColliders)
@@ -57,6 +67,7 @@ public class EnemyVision : MonoBehaviour
             if (target != null && CheckAngle(target.GetTransform, peripheralFov) && CheckView(target.GetTransform))
             {
                 peripheralDetected.Add(target);
+                lastSeenPosition = target.GetTransform.position;
             }
         }
     }

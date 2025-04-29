@@ -2,20 +2,16 @@ using UnityEngine;
 
 public class EnemySteering : MonoBehaviour
 {
-    // Referencias
     [HideInInspector] public EnemyController controller;
     private Rigidbody rb;
     private WaypointSystem waypointSystem;
 
-    // Comportamientos de steering (cambiados a la nueva interfaz)
     private ISteering seekBehavior;
-    private Flee fleeBehavior;  // Cambiar de ISteering a Flee
+    private Flee fleeBehavior;
     private ObstacleAvoidance obstacleAvoidance;
 
-    // Transform temporal para el comportamiento Seek
     private Transform targetTransform;
 
-    // Propiedades para los comportamientos
     [HideInInspector] public Vector3 currentVelocity;
     [HideInInspector] public Vector3 currentTargetPosition;
     [HideInInspector] public float currentMaxSpeed;
@@ -26,8 +22,8 @@ public class EnemySteering : MonoBehaviour
     [Header("Obstacle Avoidance")]
     public float obstacleAvoidanceWeight = 1.5f;
 
-    // Estado de movimiento
     private bool escaping = false;
+    private bool movingToPosition = false;
 
     public void Initialize()
     {
@@ -36,27 +32,22 @@ public class EnemySteering : MonoBehaviour
         waypointSystem = GetComponent<WaypointSystem>();
         obstacleAvoidance = GetComponent<ObstacleAvoidance>();
 
-        // Crear transform objetivo temporal para Seek
         GameObject targetObj = new GameObject("TargetPoint");
         targetTransform = targetObj.transform;
         targetObj.transform.parent = transform;
 
-        // Inicializar nuevos comportamientos de steering
         seekBehavior = new Seek(rb, targetTransform, controller.walkSpeed);
-        fleeBehavior = new Flee(rb, controller.PlayerTransform, controller.runSpeed);  // Asegurarnos de que estamos usando Flee y no ISteering
+        fleeBehavior = new Flee(rb, controller.PlayerTransform, controller.runSpeed);
 
-        // Verificar que exista ObstacleAvoidance
         if (obstacleAvoidance == null)
             obstacleAvoidance = gameObject.AddComponent<ObstacleAvoidance>();
 
-        // Configurar rigidbody si es necesario
         if (rb == null)
         {
             rb = gameObject.AddComponent<Rigidbody>();
             ConfigureRigidbody();
         }
 
-        // Verificar que exista WaypointSystem
         if (waypointSystem == null)
             Debug.LogError("No se encontró componente WaypointSystem");
     }
@@ -72,39 +63,34 @@ public class EnemySteering : MonoBehaviour
     void FixedUpdate()
     {
         currentVelocity = rb.linearVelocity;
+
+        if (movingToPosition)
+        {
+            UpdateMoveToPosition();
+        }
     }
 
-    // Método para seguir la ruta
     public void FollowPath()
     {
+        if (movingToPosition) return;
+
         if (escaping)
         {
-            // Obtener el siguiente punto de la ruta de escape
             Vector3 target = waypointSystem.GetEscapeTargetPosition();
             currentTargetPosition = target;
             currentMaxSpeed = controller.runSpeed;
-
-            // Actualizar posición del objetivo para Seek
             targetTransform.position = target;
 
-            // Usar fleeBehavior para alejarse del jugador, pero dirigirse hacia el punto de escape
             Vector3 steeringForce = seekBehavior.MoveDirection();
-
-            // Obtener fuerza de evasión
             Vector3 avoidForce = obstacleAvoidance.Avoid();
-
-            // Combinar fuerzas
             Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
 
             ApplySteering(combinedForce, controller.runSpeed);
 
-            // Verificar si ha llegado al punto de destino de ESCAPE actual
             if (waypointSystem.HasReachedEscapeTarget(transform.position))
             {
-                // Avanzar al siguiente punto en la ruta de escape
                 if (waypointSystem.MoveToNextEscapePoint())
                 {
-                    // Si hemos terminado de escapar (llegado al inicio)
                     escaping = false;
                     waypointSystem.ResetToStart();
                 }
@@ -112,28 +98,19 @@ public class EnemySteering : MonoBehaviour
         }
         else
         {
-            // Obtener el siguiente punto de la ruta normal
             Vector3 target = waypointSystem.GetCurrentTargetPosition();
             currentTargetPosition = target;
             currentMaxSpeed = controller.walkSpeed;
-
-            // Actualizar posición del objetivo para Seek
             targetTransform.position = target;
 
-            // Usar seekBehavior para seguir el camino
             Vector3 steeringForce = seekBehavior.MoveDirection();
-
-            // Obtener fuerza de evasión
             Vector3 avoidForce = obstacleAvoidance.Avoid();
-
-            // Combinar fuerzas
             Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
 
             ApplySteering(combinedForce, controller.walkSpeed);
         }
     }
 
-    // Aplicar el steering calculado
     private void ApplySteering(Vector3 steeringForce, float maxSpeed)
     {
         steeringForce = Vector3.ClampMagnitude(steeringForce, maxSteeringForce);
@@ -145,7 +122,6 @@ public class EnemySteering : MonoBehaviour
         }
     }
 
-    // Método para regresar al punto inicial de la ruta
     public void ReturnToStart()
     {
         if (waypointSystem != null)
@@ -158,6 +134,28 @@ public class EnemySteering : MonoBehaviour
             Debug.LogError("No se pudo encontrar WaypointSystem al intentar regresar al inicio.");
         }
     }
-    
+
     public Flee FleeBehavior => fleeBehavior;
+    
+    public void MoveToPosition(Vector3 position, float speed)
+    {
+        movingToPosition = true;
+        currentTargetPosition = position;
+        currentMaxSpeed = speed;
+        targetTransform.position = position;
+    }
+    
+    private void UpdateMoveToPosition()
+    {
+        Vector3 steeringForce = seekBehavior.MoveDirection();
+        Vector3 avoidForce = obstacleAvoidance.Avoid();
+        Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
+
+        ApplySteering(combinedForce, currentMaxSpeed);
+        
+        if (Vector3.Distance(transform.position, currentTargetPosition) < 1f)
+        {
+            movingToPosition = false;
+        }
+    }
 }
