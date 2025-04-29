@@ -91,24 +91,16 @@ public class PlayerController : MonoBehaviour
             // Aplicar movimiento con velocidad basada en el estado actual
             float currentSpeed = GetCurrentSpeed();
             Vector3 newVelocity = moveDirection * currentSpeed;
-<<<<<<< Updated upstream
-            newVelocity.y = rb.linearVelocity.y; // Mantener la caída natural por gravedad
-=======
 
             // Mantener la componente Y de la velocidad (gravedad)
             newVelocity.y = rb.linearVelocity.y;
 
             // Asignar la velocidad al Rigidbody
->>>>>>> Stashed changes
             rb.linearVelocity = newVelocity;
         }
         else
         {
-<<<<<<< Updated upstream
-            // Detener movimiento horizontal pero mantener el vertical
-=======
             // Si no hay dirección de movimiento, detener el movimiento horizontal
->>>>>>> Stashed changes
             Vector3 newVelocity = rb.linearVelocity;
             newVelocity.x = 0;
             newVelocity.z = 0;
