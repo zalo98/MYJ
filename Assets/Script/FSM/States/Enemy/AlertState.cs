@@ -3,7 +3,7 @@ using UnityEngine;
 public class AlertState : State
 {
     private EnemyController controller;
-    private AlertDecisionTree decisionTree;
+    public AlertDecisionTree decisionTree;
     private Transform playerTransform;
     private EnemyVision enemyVision;
 
@@ -50,8 +50,6 @@ public class AlertState : State
         currentTime -= Time.deltaTime;
         decisionTree.Execute();
     }
-
-
 
     public override void Sleep()
     {

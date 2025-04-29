@@ -16,6 +16,7 @@ public class CameraAI : MonoBehaviour
     private bool playerDetected = false;
     
     public event Action<Vector3> OnPlayerSeen;
+    public Vector3 LastSeenPosition => lastSeenPosition;
 
     private void Update()
     {
@@ -26,6 +27,7 @@ public class CameraAI : MonoBehaviour
         {
             Debug.Log("Player detected by camera");
             OnPlayerSeen?.Invoke(lastSeenPosition);
+            AlertSystem.Instance.AlertEnemies(lastSeenPosition);
         }
     }
 

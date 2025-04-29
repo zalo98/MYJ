@@ -1,20 +1,24 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AttackState : State
 {
     private EnemyController enemyController;
     private EnemyVision enemyVision;
     private Transform playerTransform;
+    private AttackDecisionTree attackDecisionTree;
 
     public AttackState(EnemyController controller, FSM fsm) : base(fsm)
     {
         enemyController = controller;
+        attackDecisionTree = new AttackDecisionTree(enemyController, fsm, this);
     }
 
     public override void Awake()
     {
         enemyVision = enemyController.GetComponent<EnemyVision>();
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        attackDecisionTree.StartAttack();
     }
 
     public override void Execute()
@@ -25,36 +29,23 @@ public class AttackState : State
             return;
         }
         
-        MoveTowardsPlayer();
+        attackDecisionTree.Execute();
         
         if (IsCollidingWithPlayer())
         {
             Attack();
         }
-        
-        if (!enemyVision.HasDirectDetection)
-        {
-            enemyController.StateMachine.Transition(StateEnum.EnemyPatrol);
-        }
-    }
-
-    private void MoveTowardsPlayer()
-    {
-        Vector3 playerPosition = playerTransform.position;
-        Vector3 direction = (playerPosition - enemyController.transform.position).normalized;
-        enemyController.transform.position += direction * enemyController.runSpeed * Time.deltaTime;
     }
 
     private bool IsCollidingWithPlayer()
     {
         Collider playerCollider = playerTransform.GetComponent<Collider>();
-        
         return enemyController.GetComponent<Collider>().bounds.Intersects(playerCollider.bounds);
     }
 
     private void Attack()
     {
         Debug.Log("Enemigo ha atacado al jugador!");
-        enemyController.StateMachine.Transition(StateEnum.EnemyPatrol);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

@@ -12,6 +12,8 @@ public class AlertDecisionTree
 
     private bool isRotating = false;
     public Vector3? currentTarget = null;
+    public bool wasAlertedByCamera = false;
+    public Vector3? cameraAlertPosition = null;
 
     public AlertDecisionTree(EnemyController enemy, FSM fsm, AlertState alertState)
     {
@@ -26,6 +28,18 @@ public class AlertDecisionTree
         decisionTimer = 0f;
         isRotating = false;
         currentTarget = null;
+        wasAlertedByCamera = false;
+        cameraAlertPosition = null;
+    }
+
+    public void AlertByCamera(Vector3 position)
+    {
+        wasAlertedByCamera = true;
+        cameraAlertPosition = position;
+        currentTarget = position;
+        alertState.alertTimer = 10f;
+        alertState.currentTime = 10f;
+        Debug.Log($"Enemigo alertado por cámara en posición: {position}");
     }
 
     public void Execute()
@@ -39,6 +53,13 @@ public class AlertDecisionTree
         if (isRotating)
         {
             enemy.transform.Rotate(Vector3.up * 180f * Time.deltaTime);
+            
+            alertState.currentTime -= Time.deltaTime;
+            if (alertState.currentTime <= 0f)
+            {
+                fsm.Transition(StateEnum.EnemyPatrol);
+                return;
+            }
             return;
         }
 
@@ -60,6 +81,13 @@ public class AlertDecisionTree
             return;
         }
 
+        alertState.currentTime -= Time.deltaTime;
+        if (alertState.currentTime <= 0f)
+        {
+            fsm.Transition(StateEnum.EnemyPatrol);
+            return;
+        }
+
         decisionTimer -= Time.deltaTime;
         if (decisionTimer <= 0f)
         {
@@ -75,16 +103,44 @@ public class AlertDecisionTree
             Debug.LogError("FSM or EnemyController is null.");
             return;
         }
-
+        
         ActionNode atacar = new ActionNode(() => fsm.Transition(StateEnum.Attack));
+        ActionNode irAPosicionCamara = new ActionNode(() => MoveToCameraPosition());
         ActionNode buscar = new ActionNode(() => AlertLookOrMove());
         ActionNode patrullar = new ActionNode(() => fsm.Transition(StateEnum.EnemyPatrol));
         
         QuestionNode tiempoAgotado = new QuestionNode(patrullar, buscar, () => alertState.currentTime <= 0f);
         QuestionNode hayUltimaPosicion = new QuestionNode(tiempoAgotado, patrullar, () => enemy.enemyVision.LastSeenPosition.HasValue);
-        rootNode = new QuestionNode(atacar, hayUltimaPosicion, () => enemy.enemyVision.HasDirectDetection);
+        
+        QuestionNode fueAlertadoPorCamara = new QuestionNode(
+            irAPosicionCamara,
+            hayUltimaPosicion,
+            () => wasAlertedByCamera
+        );
+        
+        rootNode = new QuestionNode(atacar, fueAlertadoPorCamara, () => enemy.enemyVision.HasDirectDetection);
     }
 
+    private void MoveToCameraPosition()
+    {
+        if (!cameraAlertPosition.HasValue)
+        {
+            return;
+        }
+
+        Vector3 target = cameraAlertPosition.Value;
+        if (Vector3.Distance(enemy.transform.position, target) > 1f)
+        {
+            currentTarget = target;
+            enemy.Steering.MoveToPosition(target, enemy.walkSpeed);
+            Debug.Log("Enemigo se mueve hacia la posición marcada por la cámara");
+        }
+        else
+        {
+            Debug.Log("Ya está en la posición marcada por la cámara");
+            isRotating = true;
+        }
+    }
 
     private void AlertLookOrMove()
     {

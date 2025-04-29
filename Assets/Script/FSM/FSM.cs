@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class FSM
 {
-    private State _currentState;
+    public State _currentState;
     Action<StateEnum, State, State> onTransition = delegate { };
 
     public FSM() { }

@@ -14,6 +14,7 @@ public class PatrolState : State
     public override void Awake()
     {
         timeSpentAtWaypoint = 0f;
+        AlertSystem.Instance.RegisterEnemy(controller);
     }
 
     public override void Execute()
@@ -43,6 +44,11 @@ public class PatrolState : State
         MoveTowardsTarget(controller.WaypointSystem.GetCurrentTargetPosition(), controller.walkSpeed);
     }
 
+    public override void Sleep()
+    {
+        AlertSystem.Instance.UnregisterEnemy(controller);
+    }
+
     private void MoveTowardsTarget(Vector3 target, float speed)
     {
         Vector3 direction = (target - controller.transform.position);
@@ -61,10 +67,5 @@ public class PatrolState : State
 
             controller.transform.position += finalDirection * speed * Time.deltaTime;
         }
-    }
-
-    public override void Sleep()
-    {
-        
     }
 }
