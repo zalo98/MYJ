@@ -2,43 +2,36 @@ using UnityEngine;
 
 public class ObstacleAvoidance : MonoBehaviour
 {
-    [Header("Obstacle Avoidance Settings")]
-    [SerializeField] float detectionRange = 2f;
-    [SerializeField] float avoidForce = 5f;
-    [SerializeField] LayerMask obstacleMask;
+    [SerializeField] private float detectionRange = 5f;
+    [SerializeField] private float avoidForce = 5f;
+    [SerializeField] private LayerMask obstacleMask;
 
     public Vector3 Avoid()
     {
         Collider[] colliders = Physics.OverlapSphere(transform.position, detectionRange, obstacleMask);
+        Collider closest = null;
+        float minDistance = detectionRange;
 
-        if (colliders.Length == 0)
-            return Vector3.zero;
-
-        float closestDistance = detectionRange + 1f;
-        Collider closestCollider = null;
-
-        foreach (var collider in colliders)
+        foreach (var col in colliders)
         {
-            float distance = Vector3.Distance(transform.position, collider.ClosestPoint(transform.position));
-            if (distance < closestDistance)
+            float dist = Vector3.Distance(transform.position, col.ClosestPoint(transform.position));
+            if (dist < minDistance)
             {
-                closestDistance = distance;
-                closestCollider = collider;
+                closest = col;
+                minDistance = dist;
             }
         }
 
-        if (closestCollider == null)
-            return Vector3.zero;
+        if (closest == null) return Vector3.zero;
 
-        Vector3 avoidDirection = (transform.position - closestCollider.ClosestPoint(transform.position)).normalized;
-        avoidDirection.y = 0f;
-        
-        float avoidanceStrength = Mathf.Lerp(avoidForce, 0f, closestDistance / detectionRange);
+        Vector3 dir = (transform.position - closest.ClosestPoint(transform.position)).normalized;
+        dir.y = 0;
 
-        return avoidDirection * avoidanceStrength;
+        float forceScale = Mathf.Lerp(1f, 0f, minDistance / detectionRange);
+        return dir * avoidForce * forceScale;
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, detectionRange);

@@ -6,10 +6,9 @@ public class EnemySteering : MonoBehaviour
     private Rigidbody rb;
     private WaypointSystem waypointSystem;
 
-    private ISteering seekBehavior;
+    private Seek seekBehavior;
     private Flee fleeBehavior;
     private ObstacleAvoidance obstacleAvoidance;
-
     private Transform targetTransform;
 
     [HideInInspector] public Vector3 currentVelocity;
@@ -32,27 +31,27 @@ public class EnemySteering : MonoBehaviour
         waypointSystem = GetComponent<WaypointSystem>();
         obstacleAvoidance = GetComponent<ObstacleAvoidance>();
 
-        GameObject targetObj = new GameObject("TargetPoint");
-        targetTransform = targetObj.transform;
-        targetObj.transform.parent = transform;
-
-        seekBehavior = new Seek(rb, targetTransform, controller.walkSpeed);
-        fleeBehavior = new Flee(rb, controller.PlayerTransform, controller.runSpeed);
-
-        if (obstacleAvoidance == null)
-            obstacleAvoidance = gameObject.AddComponent<ObstacleAvoidance>();
-
         if (rb == null)
         {
             rb = gameObject.AddComponent<Rigidbody>();
             ConfigureRigidbody();
         }
 
+        if (obstacleAvoidance == null)
+            obstacleAvoidance = gameObject.AddComponent<ObstacleAvoidance>();
+
         if (waypointSystem == null)
             Debug.LogError("No se encontró componente WaypointSystem");
+
+        GameObject targetObj = new GameObject("TargetPoint");
+        targetTransform = targetObj.transform;
+        targetTransform.parent = transform;
+
+        seekBehavior = new Seek(rb, targetTransform, controller.walkSpeed);
+        fleeBehavior = new Flee(rb, controller.PlayerTransform, controller.runSpeed);
     }
 
-    void ConfigureRigidbody()
+    private void ConfigureRigidbody()
     {
         rb.useGravity = true;
         rb.constraints = RigidbodyConstraints.FreezeRotation;
@@ -60,7 +59,7 @@ public class EnemySteering : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
-    void FixedUpdate()
+    private void FixedUpdate()
     {
         currentVelocity = rb.linearVelocity;
 
@@ -74,48 +73,43 @@ public class EnemySteering : MonoBehaviour
     {
         if (movingToPosition) return;
 
+        Vector3 target;
+        float speed;
+
         if (escaping)
         {
-            Vector3 target = waypointSystem.GetEscapeTargetPosition();
-            currentTargetPosition = target;
-            currentMaxSpeed = controller.runSpeed;
-            targetTransform.position = target;
+            target = waypointSystem.GetEscapeTargetPosition();
+            speed = controller.runSpeed;
 
-            Vector3 steeringForce = seekBehavior.MoveDirection();
-            Vector3 avoidForce = obstacleAvoidance.Avoid();
-            Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
-
-            ApplySteering(combinedForce, controller.runSpeed);
-
-            if (waypointSystem.HasReachedEscapeTarget(transform.position))
+            if (waypointSystem.HasReachedEscapeTarget(transform.position) &&
+                !waypointSystem.MoveToNextEscapePoint())
             {
-                if (waypointSystem.MoveToNextEscapePoint())
-                {
-                    escaping = false;
-                    waypointSystem.ResetToStart();
-                }
+                escaping = false;
+                waypointSystem.ResetToStart();
             }
         }
         else
         {
-            Vector3 target = waypointSystem.GetCurrentTargetPosition();
-            currentTargetPosition = target;
-            currentMaxSpeed = controller.walkSpeed;
-            targetTransform.position = target;
-
-            Vector3 steeringForce = seekBehavior.MoveDirection();
-            Vector3 avoidForce = obstacleAvoidance.Avoid();
-            Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
-
-            ApplySteering(combinedForce, controller.walkSpeed);
+            target = waypointSystem.GetCurrentTargetPosition();
+            speed = controller.walkSpeed;
         }
+
+        currentTargetPosition = target;
+        currentMaxSpeed = speed;
+        targetTransform.position = target;
+
+        Vector3 steering = seekBehavior.MoveDirection();
+        Vector3 avoid = obstacleAvoidance.Avoid();
+        Vector3 combined = steering + avoid * obstacleAvoidanceWeight;
+
+        ApplySteering(combined, speed);
     }
 
-    private void ApplySteering(Vector3 steeringForce, float maxSpeed)
+    private void ApplySteering(Vector3 force, float maxSpeed)
     {
-        steeringForce = Vector3.ClampMagnitude(steeringForce, maxSteeringForce);
+        force = Vector3.ClampMagnitude(force, maxSteeringForce);
+        rb.AddForce(force, ForceMode.Acceleration);
 
-        rb.AddForce(steeringForce);
         if (rb.linearVelocity.magnitude > maxSpeed)
         {
             rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
@@ -136,23 +130,22 @@ public class EnemySteering : MonoBehaviour
     }
 
     public Flee FleeBehavior => fleeBehavior;
-    
-    public void MoveToPosition(Vector3 position, float speed)
+
+    public void MoveToPosition(Vector3 target, float speed)
     {
-        movingToPosition = true;
-        currentTargetPosition = position;
-        currentMaxSpeed = speed;
-        targetTransform.position = position;
+        Vector3 direction = (target - transform.position).normalized;
+        rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
     }
-    
+
+
     private void UpdateMoveToPosition()
     {
-        Vector3 steeringForce = seekBehavior.MoveDirection();
-        Vector3 avoidForce = obstacleAvoidance.Avoid();
-        Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
+        Vector3 steering = seekBehavior.MoveDirection();
+        Vector3 avoid = obstacleAvoidance.Avoid();
+        Vector3 combined = steering + avoid * obstacleAvoidanceWeight;
 
-        ApplySteering(combinedForce, currentMaxSpeed);
-        
+        ApplySteering(combined, currentMaxSpeed);
+
         if (Vector3.Distance(transform.position, currentTargetPosition) < 1f)
         {
             movingToPosition = false;

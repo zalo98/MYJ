@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Flee : ISteering
@@ -14,13 +12,17 @@ public class Flee : ISteering
         this.target = target;
         this.maxVelocity = maxVelocity;
     }
+
     public Vector3 MoveDirection()
     {
         Vector3 desiredVelocity = (rb.position - target.position).normalized * maxVelocity;
-        Vector3 directionForce = desiredVelocity - rb.linearVelocity;
-        directionForce.y = 0;
-        directionForce = Vector3.ClampMagnitude(directionForce, maxVelocity);
+        Vector3 steering = desiredVelocity - rb.linearVelocity;
+        steering.y = 0;
+        return Vector3.ClampMagnitude(steering, maxVelocity);
+    }
 
-        return directionForce;
+    public void SetMaxVelocity(float newMaxVelocity)
+    {
+        maxVelocity = newMaxVelocity;
     }
 }
