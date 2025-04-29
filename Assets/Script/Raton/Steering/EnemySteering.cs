@@ -3,11 +3,11 @@ using UnityEngine.AI;
 
 public class EnemySteering : MonoBehaviour
 {
-    // Referencias
     [HideInInspector] public EnemyController controller;
     private Rigidbody rb;
     private WaypointSystem waypointSystem;
 
+<<<<<<< Updated upstream:Assets/Script/Raton/Steering/EnemySteering.cs
     // Comportamientos de steering
     private Seek seekBehavior;
     private Flee fleeBehavior;
@@ -15,6 +15,14 @@ public class EnemySteering : MonoBehaviour
     private ObstacleAvoidance obstacleAvoidance;
 
     // Propiedades para los comportamientos
+=======
+    private ISteering seekBehavior;
+    private Flee fleeBehavior;
+    private ObstacleAvoidance obstacleAvoidance;
+
+    private Transform targetTransform;
+
+>>>>>>> Stashed changes:Assets/Script/Raton/EnemySteering.cs
     [HideInInspector] public Vector3 currentVelocity;
     [HideInInspector] public Vector3 currentTargetPosition;
     [HideInInspector] public float currentMaxSpeed;
@@ -27,8 +35,8 @@ public class EnemySteering : MonoBehaviour
     [Header("Obstacle Avoidance")]
     public float obstacleAvoidanceWeight = 1.5f;
 
-    // Estado de movimiento
     private bool escaping = false;
+    private bool movingToPosition = false;
 
     public void Initialize()
     {
@@ -42,21 +50,31 @@ public class EnemySteering : MonoBehaviour
         evadeBehavior = GetComponent<Evade>();
         obstacleAvoidance = GetComponent<ObstacleAvoidance>();
 
+<<<<<<< Updated upstream:Assets/Script/Raton/Steering/EnemySteering.cs
         if (seekBehavior == null) seekBehavior = gameObject.AddComponent<Seek>();
         if (fleeBehavior == null) fleeBehavior = gameObject.AddComponent<Flee>();
         if (evadeBehavior == null) evadeBehavior = gameObject.AddComponent<Evade>();
         if (obstacleAvoidance == null) obstacleAvoidance = gameObject.AddComponent<ObstacleAvoidance>();
 
         lastTargetPosition = Vector3.zero;
+=======
+        GameObject targetObj = new GameObject("TargetPoint");
+        targetTransform = targetObj.transform;
+        targetObj.transform.parent = transform;
 
-        // Configurar rigidbody si es necesario
+        seekBehavior = new Seek(rb, targetTransform, controller.walkSpeed);
+        fleeBehavior = new Flee(rb, controller.PlayerTransform, controller.runSpeed);
+
+        if (obstacleAvoidance == null)
+            obstacleAvoidance = gameObject.AddComponent<ObstacleAvoidance>();
+>>>>>>> Stashed changes:Assets/Script/Raton/EnemySteering.cs
+
         if (rb == null)
         {
             rb = gameObject.AddComponent<Rigidbody>();
             ConfigureRigidbody();
         }
 
-        // Verificar que exista WaypointSystem
         if (waypointSystem == null)
             Debug.LogError("No se encontró componente WaypointSystem");
     }
@@ -72,17 +90,23 @@ public class EnemySteering : MonoBehaviour
     void FixedUpdate()
     {
         currentVelocity = rb.linearVelocity;
+
+        if (movingToPosition)
+        {
+            UpdateMoveToPosition();
+        }
     }
 
-    // Método para seguir la ruta
     public void FollowPath()
     {
+        if (movingToPosition) return;
+
         if (escaping)
         {
-            // Obtener el siguiente punto de la ruta de escape
             Vector3 target = waypointSystem.GetEscapeTargetPosition();
             currentTargetPosition = target;
             currentMaxSpeed = controller.runSpeed;
+<<<<<<< Updated upstream:Assets/Script/Raton/Steering/EnemySteering.cs
 
             // Dirección base hacia el punto objetivo
             Vector3 dirToTarget = (target - transform.position).normalized * controller.runSpeed;
@@ -92,16 +116,20 @@ public class EnemySteering : MonoBehaviour
 
             // Combinar fuerzas
             Vector3 combinedForce = dirToTarget + avoidForce * obstacleAvoidanceWeight;
+=======
+            targetTransform.position = target;
+
+            Vector3 steeringForce = seekBehavior.MoveDirection();
+            Vector3 avoidForce = obstacleAvoidance.Avoid();
+            Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
+>>>>>>> Stashed changes:Assets/Script/Raton/EnemySteering.cs
 
             ApplySteering(combinedForce, controller.runSpeed);
 
-            // Verificar si ha llegado al punto de destino de ESCAPE actual
             if (waypointSystem.HasReachedEscapeTarget(transform.position))
             {
-                // Avanzar al siguiente punto en la ruta de escape
                 if (waypointSystem.MoveToNextEscapePoint())
                 {
-                    // Si hemos terminado de escapar (llegado al inicio)
                     escaping = false;
                     waypointSystem.ResetToStart();
                 }
@@ -109,10 +137,10 @@ public class EnemySteering : MonoBehaviour
         }
         else
         {
-            // Obtener el siguiente punto de la ruta normal
             Vector3 target = waypointSystem.GetCurrentTargetPosition();
             currentTargetPosition = target;
             currentMaxSpeed = controller.walkSpeed;
+<<<<<<< Updated upstream:Assets/Script/Raton/Steering/EnemySteering.cs
 
             // Dirección base hacia el punto objetivo
             Vector3 dirToTarget = (target - transform.position).normalized * controller.walkSpeed;
@@ -122,6 +150,13 @@ public class EnemySteering : MonoBehaviour
 
             // Combinar fuerzas
             Vector3 combinedForce = dirToTarget + avoidForce * obstacleAvoidanceWeight;
+=======
+            targetTransform.position = target;
+
+            Vector3 steeringForce = seekBehavior.MoveDirection();
+            Vector3 avoidForce = obstacleAvoidance.Avoid();
+            Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
+>>>>>>> Stashed changes:Assets/Script/Raton/EnemySteering.cs
 
             ApplySteering(combinedForce, controller.walkSpeed);
 
@@ -133,7 +168,21 @@ public class EnemySteering : MonoBehaviour
         }
     }
 
+<<<<<<< Updated upstream:Assets/Script/Raton/Steering/EnemySteering.cs
     // Método para huir
+=======
+    private void ApplySteering(Vector3 steeringForce, float maxSpeed)
+    {
+        steeringForce = Vector3.ClampMagnitude(steeringForce, maxSteeringForce);
+
+        rb.AddForce(steeringForce);
+        if (rb.linearVelocity.magnitude > maxSpeed)
+        {
+            rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
+        }
+    }
+
+>>>>>>> Stashed changes:Assets/Script/Raton/EnemySteering.cs
     public void ReturnToStart()
     {
         if (!escaping)
@@ -177,6 +226,7 @@ public class EnemySteering : MonoBehaviour
         }
     }
 
+<<<<<<< Updated upstream:Assets/Script/Raton/Steering/EnemySteering.cs
     public bool HasReachedCurrentTarget()
     {
         return waypointSystem.HasReachedCurrentTarget(transform.position);
@@ -198,3 +248,29 @@ public class EnemySteering : MonoBehaviour
         get { return obstacleAvoidance ? obstacleAvoidance.detectionRange : 3f; }
     }
 }
+=======
+    public Flee FleeBehavior => fleeBehavior;
+    
+    public void MoveToPosition(Vector3 position, float speed)
+    {
+        movingToPosition = true;
+        currentTargetPosition = position;
+        currentMaxSpeed = speed;
+        targetTransform.position = position;
+    }
+    
+    private void UpdateMoveToPosition()
+    {
+        Vector3 steeringForce = seekBehavior.MoveDirection();
+        Vector3 avoidForce = obstacleAvoidance.Avoid();
+        Vector3 combinedForce = steeringForce + avoidForce * obstacleAvoidanceWeight;
+
+        ApplySteering(combinedForce, currentMaxSpeed);
+        
+        if (Vector3.Distance(transform.position, currentTargetPosition) < 1f)
+        {
+            movingToPosition = false;
+        }
+    }
+}
+>>>>>>> Stashed changes:Assets/Script/Raton/EnemySteering.cs
