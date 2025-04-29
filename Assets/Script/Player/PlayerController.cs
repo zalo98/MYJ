@@ -21,6 +21,11 @@ public class PlayerController : MonoBehaviour
 
     private Vector3 moveDirection;
 
+    [SerializeField] private Transform interactionPoint; // Punto desde donde se inicia la interaccion
+    [SerializeField] private float interactionRadius = 2f; // Radio de interacción
+    [SerializeField] private LayerMask interactionLayer; // Capa de objetos interactuables
+    private Collider[] interactables = new Collider[10];
+
     private void Awake()
     {
         // Obtener componentes
@@ -72,6 +77,11 @@ public class PlayerController : MonoBehaviour
     {
         // Actualizar la máquina de estados
         fsm.Update();
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            TryInteract();
+        }
     }
 
     private void FixedUpdate()
@@ -133,6 +143,31 @@ public class PlayerController : MonoBehaviour
         if (currentState == walkState) return walkSpeed;
 
         return 0f;
+    }
+
+    private void TryInteract()
+    {
+        Debug.Log("Tried Interacting");
+
+        int elements = Physics.OverlapSphereNonAlloc(interactionPoint.position, interactionRadius, interactables, interactionLayer);
+
+        if (elements == 0)
+        {
+            Debug.Log("No interactables found");
+            return;
+        }
+
+        for (int i = 0; i < interactables.Length; i++)
+        {
+            var interactable = interactables[i];
+            var interactableComponent = interactable.GetComponent<IInteractable>();
+
+            if (interactableComponent != null)
+            {
+                interactableComponent.Interact();
+                return;
+            }
+        }
     }
 
     // Para debug o UI, obtener el nombre del estado actual

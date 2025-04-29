@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EnemyController : MonoBehaviour
+public class EnemyController : MonoBehaviour, IInteractable
 {
     // Referencias a componentes
     [HideInInspector] public FSM StateMachine;
@@ -112,5 +112,28 @@ public class EnemyController : MonoBehaviour
         enemyVision.UpdateDetection();
         
         StateMachine.Update();
+    }
+
+    public void Interact()
+    {
+        // Verificar si tiene el componente CollectibleEnemy
+        CollectibleEnemy collectible = GetComponent<CollectibleEnemy>();
+
+        if (collectible != null)
+        {
+            // Es un enemigo recolectable
+            collectible.OnCollected();
+
+            // Destruir el enemigo después de recolectarlo
+            Destroy(gameObject);
+        }
+        else
+        {
+            // Es un enemigo normal, no recolectable
+            Debug.Log("Este enemigo no es recolectable");
+        }
+
+        // Destruir el enemigo
+        Destroy(gameObject);
     }
 }
