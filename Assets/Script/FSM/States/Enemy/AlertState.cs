@@ -7,9 +7,6 @@ public class AlertState : State
     private Transform playerTransform;
     private EnemyVision enemyVision;
 
-    public float alertTimer = 10f;
-    public float currentTime;
-
     public AlertState(EnemyController controller, FSM fsm) : base(fsm)
     {
         this.controller = controller;
@@ -30,24 +27,20 @@ public class AlertState : State
 
         decisionTree = new AlertDecisionTree(controller, fsm, this);
         decisionTree.StartAlert();
-
-        currentTime = alertTimer;
     }
 
     public override void Execute()
     {
         if (enemyVision.HasPeripheralDetection)
         {
-            currentTime = alertTimer;
-            Debug.Log("Jugador visto periféricamente, timer reiniciado");
+            Debug.Log("Jugador visto periféricamente");
         }
         
         if (decisionTree.currentTarget.HasValue)
         {
-            currentTime = alertTimer;
+            Debug.Log("Enemigo tiene un objetivo al que moverse");
         }
     
-        currentTime -= Time.deltaTime;
         decisionTree.Execute();
     }
 

@@ -9,6 +9,8 @@ public class AlertDecisionTree
 
     private float decisionInterval = 2f;
     private float decisionTimer = 0f;
+    private float alertTimer = 10f;
+    private float currentTime;
 
     private bool isRotating = false;
     public Vector3? currentTarget = null;
@@ -30,6 +32,7 @@ public class AlertDecisionTree
         currentTarget = null;
         wasAlertedByCamera = false;
         cameraAlertPosition = null;
+        currentTime = alertTimer;
     }
 
     public void AlertByCamera(Vector3 position)
@@ -37,8 +40,7 @@ public class AlertDecisionTree
         wasAlertedByCamera = true;
         cameraAlertPosition = position;
         currentTarget = position;
-        alertState.alertTimer = 10f;
-        alertState.currentTime = 10f;
+        currentTime = alertTimer;
         Debug.Log($"Enemigo alertado por cámara en posición: {position}");
     }
 
@@ -46,16 +48,16 @@ public class AlertDecisionTree
     {
         if (enemy.enemyVision.HasDirectDetection)
         {
-            fsm.Transition(StateEnum.Attack);
+            rootNode?.Execute();
             return;
         }
 
         if (isRotating)
         {
             enemy.transform.Rotate(Vector3.up * 180f * Time.deltaTime);
+            currentTime -= Time.deltaTime;
             
-            alertState.currentTime -= Time.deltaTime;
-            if (alertState.currentTime <= 0f)
+            if (currentTime <= 0f)
             {
                 fsm.Transition(StateEnum.EnemyPatrol);
                 return;
@@ -66,25 +68,16 @@ public class AlertDecisionTree
         if (currentTarget.HasValue)
         {
             enemy.Steering.MoveToPosition(currentTarget.Value, enemy.walkSpeed);
-            
-            alertState.currentTime = alertState.alertTimer;
+            currentTime = alertTimer;
 
             float distance = Vector3.Distance(enemy.transform.position, currentTarget.Value);
             if (distance <= 1f)
             {
                 currentTarget = null;
                 Debug.Log("Llegó a la última posición del jugador");
-                
                 isRotating = true;
                 Debug.Log("Enemigo empieza a rotar alrededor de la posición");
             }
-            return;
-        }
-
-        alertState.currentTime -= Time.deltaTime;
-        if (alertState.currentTime <= 0f)
-        {
-            fsm.Transition(StateEnum.EnemyPatrol);
             return;
         }
 
@@ -103,13 +96,13 @@ public class AlertDecisionTree
             Debug.LogError("FSM or EnemyController is null.");
             return;
         }
-        
+
         ActionNode atacar = new ActionNode(() => fsm.Transition(StateEnum.Attack));
         ActionNode irAPosicionCamara = new ActionNode(() => MoveToCameraPosition());
         ActionNode buscar = new ActionNode(() => AlertLookOrMove());
         ActionNode patrullar = new ActionNode(() => fsm.Transition(StateEnum.EnemyPatrol));
         
-        QuestionNode tiempoAgotado = new QuestionNode(patrullar, buscar, () => alertState.currentTime <= 0f);
+        QuestionNode tiempoAgotado = new QuestionNode(patrullar, buscar, () => currentTime <= 0f);
         QuestionNode hayUltimaPosicion = new QuestionNode(tiempoAgotado, patrullar, () => enemy.enemyVision.LastSeenPosition.HasValue);
         
         QuestionNode fueAlertadoPorCamara = new QuestionNode(
@@ -133,6 +126,7 @@ public class AlertDecisionTree
         {
             currentTarget = target;
             enemy.Steering.MoveToPosition(target, enemy.walkSpeed);
+            currentTime = alertTimer;
             Debug.Log("Enemigo se mueve hacia la posición marcada por la cámara");
         }
         else
@@ -160,11 +154,13 @@ public class AlertDecisionTree
             {
                 currentTarget = target;
                 enemy.Steering.MoveToPosition(target, enemy.walkSpeed);
+                currentTime = alertTimer;
                 Debug.Log("Enemigo se mueve hacia la última posición del jugador");
             }
             else
             {
                 Debug.Log("Última posición demasiado cercana, enemigo no se mueve.");
+                isRotating = true;
             }
         }
     }

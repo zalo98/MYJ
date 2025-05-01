@@ -14,8 +14,8 @@ public class EnemyVision : MonoBehaviour
     [SerializeField] private LayerMask targetMask;
     [SerializeField] private LayerMask obstacleMask;
 
-     private List<ITarget> directDetected = new List<ITarget>();
-    private List<ITarget> peripheralDetected = new List<ITarget>();
+    private List<ITarget> directDetected = new List<ITarget>();
+    public List<ITarget> peripheralDetected = new List<ITarget>();
 
     private Vector3? lastSeenPosition = null;
     public Vector3? LastSeenPosition => lastSeenPosition;

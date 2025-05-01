@@ -15,6 +15,7 @@ public class PatrolState : State
     {
         timeSpentAtWaypoint = 0f;
         AlertSystem.Instance.RegisterEnemy(controller);
+        Debug.Log("Enemigo entró a PatrolState");
     }
 
     public override void Execute()

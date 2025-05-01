@@ -40,19 +40,40 @@ public class AttackDecisionTree
 
         if (isRotating)
         {
-            enemy.transform.Rotate(Vector3.up * 180f * Time.deltaTime);
-            
-            currentSearchTime -= Time.deltaTime;
-            if (currentSearchTime <= 0f)
+            if (currentSearchTime > 0f)
             {
-                fsm.Transition(StateEnum.EnemyPatrol);
-                return;
+                enemy.transform.Rotate(Vector3.up * 180f * Time.deltaTime);
+                currentSearchTime -= Time.deltaTime;
+                Debug.Log($"Tiempo restante: {currentSearchTime}");
+            }
+            
+            if (rootNode != null)
+            {
+                rootNode.Execute();
             }
             return;
         }
         
-        isRotating = true;
-        Debug.Log("Enemigo empieza a buscar al jugador");
+        if (enemy.enemyVision.LastSeenPosition.HasValue)
+        {
+            Vector3 lastPosition = enemy.enemyVision.LastSeenPosition.Value;
+            float distance = Vector3.Distance(enemy.transform.position, lastPosition);
+            
+            if (distance > 1f)
+            {
+                enemy.Steering.MoveToPosition(lastPosition, enemy.runSpeed);
+            }
+            else
+            {
+                isRotating = true;
+                Debug.Log("Enemigo empieza a buscar al jugador");
+            }
+        }
+        else
+        {
+            isRotating = true;
+            Debug.Log("Enemigo empieza a buscar al jugador");
+        }
     }
 
     private void CreateTree()
@@ -63,22 +84,18 @@ public class AttackDecisionTree
             return;
         }
         
-        ActionNode atacar = new ActionNode(() => {
-            enemy.Steering.MoveToPosition(enemy.enemyVision.LastSeenPosition.Value, enemy.runSpeed);
-            currentSearchTime = searchTimer;
-            isRotating = false;
+        ActionNode atacar = new ActionNode(() => { 
+            if (enemy.enemyVision.LastSeenPosition.HasValue)
+            {
+                enemy.Steering.MoveToPosition(enemy.enemyVision.LastSeenPosition.Value, enemy.runSpeed); 
+                currentSearchTime = searchTimer;
+                isRotating = false;
+            }
         });
         
-        ActionNode buscar = new ActionNode(() => {
-            isRotating = true;
-            Debug.Log("Enemigo empieza a buscar al jugador");
-        });
+        ActionNode patrullar = new ActionNode(() => { fsm.Transition(StateEnum.EnemyPatrol); isRotating = false; });
         
-        ActionNode patrullar = new ActionNode(() => fsm.Transition(StateEnum.EnemyPatrol));
-        
-        QuestionNode tiempoAgotado = new QuestionNode(patrullar, buscar, () => currentSearchTime <= 0f);
-        QuestionNode estaGirando = new QuestionNode(tiempoAgotado, buscar, () => isRotating);
-        
+        QuestionNode estaGirando = new QuestionNode(atacar, patrullar, () => currentSearchTime > 0f);
         rootNode = new QuestionNode(atacar, estaGirando, () => enemy.enemyVision.HasDirectDetection);
     }
 
