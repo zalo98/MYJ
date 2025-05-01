@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour, ITarget
     private PlayerIdleState idleState;
     private PlayerWalkState walkState;
     private PlayerRunState runState;
+    private PlayerInvisibleState invisibleState;
     
     [SerializeField] private float walkSpeed = 3f;
     [SerializeField] private float runSpeed = 6f;
@@ -17,6 +18,7 @@ public class PlayerController : MonoBehaviour, ITarget
     [SerializeField] private float groundDrag = 5f;
 
     private Vector3 moveDirection;
+    private bool spacePressedThisFrame = false;
 
     [SerializeField] private Transform interactionPoint;
     [SerializeField] private float interactionRadius = 2f;
@@ -51,24 +53,38 @@ public class PlayerController : MonoBehaviour, ITarget
         idleState = new PlayerIdleState(fsm, this, animController);
         walkState = new PlayerWalkState(fsm, this, animController);
         runState = new PlayerRunState(fsm, this, animController);
+        invisibleState = new PlayerInvisibleState(fsm, this, animController);
         
         idleState.AddTransition(StateEnum.PlayerWalk, walkState);
         idleState.AddTransition(StateEnum.PlayerRun, runState);
-
+        idleState.AddTransition(StateEnum.PlayerInvisible, invisibleState);
+        
         walkState.AddTransition(StateEnum.PlayerIdle, idleState);
         walkState.AddTransition(StateEnum.PlayerRun, runState);
-
+        walkState.AddTransition(StateEnum.PlayerInvisible, invisibleState);
+        
         runState.AddTransition(StateEnum.PlayerIdle, idleState);
         runState.AddTransition(StateEnum.PlayerWalk, walkState);
+        runState.AddTransition(StateEnum.PlayerInvisible, invisibleState);
+        
+        invisibleState.AddTransition(StateEnum.PlayerIdle, idleState);
         
         fsm.SetInit(idleState);
     }
 
     private void Update()
     {
+        spacePressedThisFrame = false;
+        
         fsm.Update();
-
-        if (Input.GetKeyDown(KeyCode.E))
+        
+        if (Input.GetKeyDown(KeyCode.Space) && fsm.GetCurrentState() != invisibleState && !spacePressedThisFrame)
+        {
+            spacePressedThisFrame = true;
+            fsm.Transition(StateEnum.PlayerInvisible);
+        }
+        
+        if (Input.GetKeyDown(KeyCode.E) && fsm.GetCurrentState() != invisibleState)
         {
             TryInteract();
         }
@@ -123,6 +139,7 @@ public class PlayerController : MonoBehaviour, ITarget
 
         if (currentState == runState) return runSpeed;
         if (currentState == walkState) return walkSpeed;
+        if (currentState == invisibleState) return ((PlayerInvisibleState)currentState).GetInvisibleSpeed();
 
         return 0f;
     }
@@ -164,7 +181,28 @@ public class PlayerController : MonoBehaviour, ITarget
         if (currentState == idleState) return "Idle";
         if (currentState == walkState) return "Walk";
         if (currentState == runState) return "Run";
+        if (currentState == invisibleState) return "Invisible";
 
         return "Unknown";
+    }
+
+    public bool IsDetectable()
+    {
+        State currentState = fsm.GetCurrentState();
+        if (currentState == invisibleState)
+        {
+            return ((PlayerInvisibleState)currentState).IsDetectable();
+        }
+        return true;
+    }
+
+    public bool CanProcessSpaceInput()
+    {
+        if (spacePressedThisFrame)
+        {
+            return false;
+        }
+        spacePressedThisFrame = true;
+        return true;
     }
 }

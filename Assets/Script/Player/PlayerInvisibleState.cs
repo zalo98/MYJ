@@ -1,11 +1,13 @@
 using UnityEngine;
 
-public class PlayerWalkState : State
+public class PlayerInvisibleState : State
 {
     private PlayerController playerController;
     private PlayerAnimationController animController;
+    private bool isDetectable = false;
+    private readonly float invisibleSpeed = 3f; // Velocidad de movimiento en estado invisible
 
-    public PlayerWalkState(FSM fsm, PlayerController controller, PlayerAnimationController animController) : base(fsm)
+    public PlayerInvisibleState(FSM fsm, PlayerController controller, PlayerAnimationController animController) : base(fsm)
     {
         this.playerController = controller;
         this.animController = animController;
@@ -13,37 +15,32 @@ public class PlayerWalkState : State
 
     public override void Awake()
     {
-        Debug.Log("Entrando en estado Walk");
-        animController.PlayWalkAnimation();
+        Debug.Log("Entrando en estado Invisible");
+        animController.PlayInvisibleAnimation();
+        isDetectable = false;
     }
 
     public override void Execute()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
-        
+
         if (Mathf.Abs(horizontalInput) < 0.1f && Mathf.Abs(verticalInput) < 0.1f)
         {
             playerController.SetMoveDirection(Vector3.zero);
+            animController.PlayIdleAnimation();
+        }
+        else
+        {
+            Vector3 movement = CalculateCameraRelativeMovement(horizontalInput, verticalInput);
+            playerController.SetMoveDirection(movement);
+            animController.PlayWalkAnimation();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Space) && playerController.CanProcessSpaceInput())
+        {
             fsm.Transition(StateEnum.PlayerIdle);
-            return;
         }
-        
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-        {
-            fsm.Transition(StateEnum.PlayerRun);
-            return;
-        }
-        
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            fsm.Transition(StateEnum.PlayerInvisible);
-            return;
-        }
-        
-        Vector3 movement = CalculateCameraRelativeMovement(horizontalInput, verticalInput);
-        
-        playerController.SetMoveDirection(movement);
     }
 
     private Vector3 CalculateCameraRelativeMovement(float horizontalInput, float verticalInput)
@@ -75,6 +72,17 @@ public class PlayerWalkState : State
 
     public override void Sleep()
     {
-        Debug.Log("Saliendo del estado Walk");
+        Debug.Log("Saliendo del estado Invisible");
+        isDetectable = true;
     }
-}
+
+    public bool IsDetectable()
+    {
+        return isDetectable;
+    }
+
+    public float GetInvisibleSpeed()
+    {
+        return invisibleSpeed;
+    }
+} 

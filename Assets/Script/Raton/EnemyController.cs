@@ -69,17 +69,22 @@ public class EnemyController : MonoBehaviour, IInteractable
         PatrolState.AddTransition(StateEnum.EnemyAlert, AlertState);
         PatrolState.AddTransition(StateEnum.Attack, AttackState);
         PatrolState.AddTransition(StateEnum.EnemyLookingState, EnemylookingState);
+        
         AlertState.AddTransition(StateEnum.EnemyPatrol, PatrolState);
         AlertState.AddTransition(StateEnum.Attack, AttackState);
+        
         AttackState.AddTransition(StateEnum.EnemyEscape, EscapeState);
         AttackState.AddTransition(StateEnum.EnemyAlert, AlertState);
         AttackState.AddTransition(StateEnum.EnemyPatrol, PatrolState);
+        
         EscapeState.AddTransition(StateEnum.EnemyAlert, AlertState);
         
         MousePatrolState.AddTransition(StateEnum.MouseLookingState, MouseLookingState);
         MousePatrolState.AddTransition(StateEnum.MouseEscapeState, MouseEscapeState);
+        
         MouseLookingState.AddTransition(StateEnum.MouseEscapeState, MouseEscapeState);
         MouseLookingState.AddTransition(StateEnum.MousePatrolState, MousePatrolState);
+        
         MouseEscapeState.AddTransition(StateEnum.MousePatrolState, MousePatrolState);
         MouseEscapeState.AddTransition(StateEnum.MouseLookingState, MouseLookingState);
     }

@@ -43,6 +43,11 @@ public class CameraAI : MonoBehaviour
 
             if (target != null && CheckAngle(target.GetTransform) && CheckView(target.GetTransform))
             {
+                if (target is PlayerController player && !player.IsDetectable())
+                {
+                    continue;
+                }
+
                 targetDetected.Add(target);
                 lastSeenPosition = target.GetTransform.position;
                 Debug.Log("Player last seen at: " + lastSeenPosition);

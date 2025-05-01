@@ -13,7 +13,7 @@ public class InvisibleState : State
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            fsm.Transition(StateEnum.Visible);
+            
         }
     }
 

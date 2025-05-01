@@ -51,6 +51,11 @@ public class EnemyVision : MonoBehaviour
             ITarget target = hitCollider.GetComponent<ITarget>();
             if (target != null && CheckAngle(target.GetTransform, directFov) && CheckView(target.GetTransform))
             {
+                if (target is PlayerController player && !player.IsDetectable())
+                {
+                    continue;
+                }
+
                 directDetected.Add(target);
                 lastSeenPosition = target.GetTransform.position;
             }
@@ -66,6 +71,11 @@ public class EnemyVision : MonoBehaviour
             ITarget target = hitCollider.GetComponent<ITarget>();
             if (target != null && CheckAngle(target.GetTransform, peripheralFov) && CheckView(target.GetTransform))
             {
+                if (target is PlayerController player && !player.IsDetectable())
+                {
+                    continue;
+                }
+
                 peripheralDetected.Add(target);
                 lastSeenPosition = target.GetTransform.position;
             }

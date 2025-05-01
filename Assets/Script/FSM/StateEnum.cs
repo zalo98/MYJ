@@ -1,17 +1,18 @@
 public enum StateEnum
 {
-    Visible,
-    Invisible,
+    //EnemyStates
     EnemyPatrol,
     EnemyAlert,
     Attack,
     EnemyEscape,
     EnemySeek,
     EnemyLookingState,
+    //MouseStates
     MousePatrolState,
     MouseLookingState,
     MouseEscapeState,
-    //States del Player
+    //PlayerStates
+    PlayerInvisible,
     PlayerIdle,
     PlayerWalk,
     PlayerRun

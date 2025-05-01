@@ -15,20 +15,17 @@ public class PlayerIdleState : State
     {
         Debug.Log("Entrando en estado Idle");
         animController.PlayIdleAnimation();
-
-        // Aseguramos que no haya movimiento
+        
         playerController.SetMoveDirection(Vector3.zero);
     }
 
     public override void Execute()
     {
-        // Verificar si el jugador está intentando moverse
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
 
         if (Mathf.Abs(horizontalInput) > 0.1f || Mathf.Abs(verticalInput) > 0.1f)
         {
-            // Si está presionando Shift, transicionar a correr, sino a caminar
             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
             {
                 fsm.Transition(StateEnum.PlayerRun);
@@ -37,6 +34,11 @@ public class PlayerIdleState : State
             {
                 fsm.Transition(StateEnum.PlayerWalk);
             }
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            fsm.Transition(StateEnum.PlayerInvisible);
         }
     }
 

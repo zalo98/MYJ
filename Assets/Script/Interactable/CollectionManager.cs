@@ -3,9 +3,7 @@ using UnityEngine;
 public class CollectionManager : MonoBehaviour
 {
     [SerializeField] private int captureCount = 0;
-    [SerializeField] private TMPro.TextMeshProUGUI countText; // Referencia al texto UI para mostrar el contador
-
-    // Singleton para acceso fácil
+    [SerializeField] private TMPro.TextMeshProUGUI countText;
     public static CollectionManager Instance { get; private set; }
 
     private void Awake()

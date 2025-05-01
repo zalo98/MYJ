@@ -21,57 +21,54 @@ public class PlayerRunState : State
     {
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
-
-        // Verificar si el jugador está presionando teclas de movimiento
+        
         if (Mathf.Abs(horizontalInput) < 0.1f && Mathf.Abs(verticalInput) < 0.1f)
         {
             playerController.SetMoveDirection(Vector3.zero);
             fsm.Transition(StateEnum.PlayerIdle);
             return;
         }
-
-        // Verificar si el jugador dejó de correr
+        
         if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
         {
             fsm.Transition(StateEnum.PlayerWalk);
             return;
         }
-
-        // Calcular dirección de movimiento relativa a la cámara
+        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            fsm.Transition(StateEnum.PlayerInvisible);
+            return;
+        }
+        
         Vector3 movement = CalculateCameraRelativeMovement(horizontalInput, verticalInput);
-
-        // Establecer la dirección de movimiento
+        
         playerController.SetMoveDirection(movement);
     }
 
     private Vector3 CalculateCameraRelativeMovement(float horizontalInput, float verticalInput)
     {
-        // Obtener la cámara para movimiento relativo a ella
         Camera mainCamera = Camera.main;
         if (mainCamera == null)
         {
-            // Si no hay cámara, usar movimiento global
             return new Vector3(horizontalInput, 0, verticalInput).normalized;
         }
-
-        // Obtener direcciones de la cámara
+        
         Vector3 forward = mainCamera.transform.forward;
         Vector3 right = mainCamera.transform.right;
-
-        // Proyectar en plano horizontal para evitar movimiento vertical
+        
         forward.y = 0;
         right.y = 0;
-
-        // Normalizar si tienen magnitud
+        
         if (forward.magnitude > 0.1f) forward.Normalize();
         if (right.magnitude > 0.1f) right.Normalize();
-
-        // Calcular dirección relativa a la cámara
+        
         Vector3 desiredDirection = forward * verticalInput + right * horizontalInput;
 
-        // Normalizar si tiene magnitud
         if (desiredDirection.magnitude > 0.1f)
+        {
             desiredDirection.Normalize();
+        }
 
         return desiredDirection;
     }
