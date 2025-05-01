@@ -67,6 +67,17 @@ public class AlertDecisionTree
 
         if (currentTarget.HasValue)
         {
+            if (enemy.enemyVision.HasDirectDetection)
+            {
+                rootNode?.Execute();
+                return;
+            }
+            else if (enemy.enemyVision.HasPeripheralDetection)
+            {
+                AlertLookOrMove();
+                return;
+            }
+
             enemy.Steering.MoveToPosition(currentTarget.Value, enemy.walkSpeed);
             currentTime = alertTimer;
 
@@ -121,6 +132,18 @@ public class AlertDecisionTree
             return;
         }
 
+        // Verificar visión mientras se mueve
+        if (enemy.enemyVision.HasDirectDetection)
+        {
+            rootNode?.Execute();
+            return;
+        }
+        else if (enemy.enemyVision.HasPeripheralDetection)
+        {
+            AlertLookOrMove();
+            return;
+        }
+
         Vector3 target = cameraAlertPosition.Value;
         if (Vector3.Distance(enemy.transform.position, target) > 1f)
         {
@@ -140,6 +163,13 @@ public class AlertDecisionTree
     {
         if (!enemy.enemyVision.LastSeenPosition.HasValue)
             return;
+
+        // Verificar visión antes de decidir qué hacer
+        if (enemy.enemyVision.HasDirectDetection)
+        {
+            rootNode?.Execute();
+            return;
+        }
 
         if (Randoms.Chance(0.5f))
         {
