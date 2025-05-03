@@ -6,13 +6,16 @@ public class PlayerInvisibleState : State
     private PlayerAnimationController animController;
     private bool isDetectable = false;
     private readonly float invisibleSpeed = 3f;
-    private const float INVISIBLE_ALPHA = 0.5f;
-    private const float VISIBLE_ALPHA = 1f;
+    private const float invisible_Alpha = 0.5f;
+    private const float visible_Alpha = 1f;
+    private const float maxInvisibleTime = 10f;
+    private float currentInvisibleTime;
 
     public PlayerInvisibleState(FSM fsm, PlayerController controller, PlayerAnimationController animController) : base(fsm)
     {
         this.playerController = controller;
         this.animController = animController;
+        currentInvisibleTime = maxInvisibleTime;
     }
 
     public override void Awake()
@@ -42,19 +45,19 @@ public class PlayerInvisibleState : State
                     if (material.HasProperty("_Color"))
                     {
                         Color color = material.GetColor("_Color");
-                        color.a = INVISIBLE_ALPHA;
+                        color.a = invisible_Alpha;
                         material.SetColor("_Color", color);
                     }
                     
                     if (material.HasProperty("_BaseColor"))
                     {
                         Color color = material.GetColor("_BaseColor");
-                        color.a = INVISIBLE_ALPHA;
+                        color.a = invisible_Alpha;
                         material.SetColor("_BaseColor", color);
                     }
                     
                     Color mainColor = material.color;
-                    mainColor.a = INVISIBLE_ALPHA;
+                    mainColor.a = invisible_Alpha;
                     material.color = mainColor;
                     
                     material.SetOverrideTag("RenderType", "Transparent");
@@ -68,6 +71,16 @@ public class PlayerInvisibleState : State
 
     public override void Execute()
     {
+        // Actualizar el timer
+        currentInvisibleTime -= Time.deltaTime;
+        
+        // Si el timer llega a 0, cambiar a IdleState
+        if (currentInvisibleTime <= 0)
+        {
+            fsm.Transition(StateEnum.PlayerIdle);
+            return;
+        }
+
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
 
@@ -141,19 +154,19 @@ public class PlayerInvisibleState : State
                     if (material.HasProperty("_Color"))
                     {
                         Color color = material.GetColor("_Color");
-                        color.a = VISIBLE_ALPHA;
+                        color.a = visible_Alpha;
                         material.SetColor("_Color", color);
                     }
                     
                     if (material.HasProperty("_BaseColor"))
                     {
                         Color color = material.GetColor("_BaseColor");
-                        color.a = VISIBLE_ALPHA;
+                        color.a = visible_Alpha;
                         material.SetColor("_BaseColor", color);
                     }
 
                     Color mainColor = material.color;
-                    mainColor.a = VISIBLE_ALPHA;
+                    mainColor.a = visible_Alpha;
                     material.color = mainColor;
                     
                     material.SetOverrideTag("RenderType", "Opaque");
@@ -173,5 +186,20 @@ public class PlayerInvisibleState : State
     public float GetInvisibleSpeed()
     {
         return invisibleSpeed;
+    }
+
+    public bool CanEnterInvisibleState()
+    {
+        return currentInvisibleTime > 0;
+    }
+
+    public float GetRemainingInvisibleTime()
+    {
+        return currentInvisibleTime;
+    }
+
+    public void ResetInvisibleTime()
+    {
+        currentInvisibleTime = maxInvisibleTime;
     }
 } 

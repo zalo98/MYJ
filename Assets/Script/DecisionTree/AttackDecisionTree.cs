@@ -30,7 +30,7 @@ public class AttackDecisionTree
 
     public void Execute()
     {
-        if (enemy.enemyVision.HasDirectDetection)
+        if (enemy.enemyVision.HasDirectDetection || enemy.enemyVision.HasPeripheralDetection)
         {
             enemy.Steering.MoveToPosition(enemy.enemyVision.LastSeenPosition.Value, enemy.runSpeed);
             currentSearchTime = searchTimer;
