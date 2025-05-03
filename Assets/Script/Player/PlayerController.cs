@@ -208,4 +208,14 @@ public class PlayerController : MonoBehaviour, ITarget
         spacePressedThisFrame = true;
         return true;
     }
+
+    public PlayerInvisibleState GetInvisibleState()
+    {
+        return invisibleState;
+    }
+
+    public void ResetInvisibleTime()
+    {
+        invisibleState.ResetInvisibleTime();
+    }
 }
