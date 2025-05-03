@@ -25,10 +25,13 @@ public class PlayerController : MonoBehaviour, ITarget
     [SerializeField] private LayerMask interactionLayer;
     private Collider[] interactables = new Collider[10];
 
+    public Renderer[] playerRenderers;
+    
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         animController = GetComponent<PlayerAnimationController>();
+        playerRenderers = GetComponentsInChildren<Renderer>();
 
         if (animController == null)
         {
