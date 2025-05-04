@@ -42,31 +42,11 @@ public class PatrolState : State
             }
         }
 
-        MoveTowardsTarget(controller.WaypointSystem.GetCurrentTargetPosition(), controller.walkSpeed);
+        controller.Steering.MoveToPosition(controller.WaypointSystem.GetCurrentTargetPosition(), controller.walkSpeed);
     }
 
     public override void Sleep()
     {
         AlertSystem.Instance.UnregisterEnemy(controller);
-    }
-
-    private void MoveTowardsTarget(Vector3 target, float speed)
-    {
-        Vector3 direction = (target - controller.transform.position);
-        direction.y = 0f;
-
-        if (direction.sqrMagnitude > 0.1f)
-        {
-            controller.transform.rotation = Quaternion.Slerp(
-                controller.transform.rotation,
-                Quaternion.LookRotation(direction),
-                controller.rotationSpeed * Time.deltaTime
-            );
-
-            Vector3 avoidance = controller.obstacleAvoidance.Avoid();
-            Vector3 finalDirection = (direction.normalized + avoidance).normalized;
-
-            controller.transform.position += finalDirection * speed * Time.deltaTime;
-        }
     }
 }

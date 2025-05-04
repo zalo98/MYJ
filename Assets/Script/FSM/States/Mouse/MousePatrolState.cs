@@ -44,25 +44,7 @@ public class MousePatrolState : State
             }
         }
         
-        Vector3 targetPosition = controller.WaypointSystem.GetCurrentTargetPosition();
-        MoveTowardsTarget(targetPosition, controller.walkSpeed);
-    }
-
-    private void MoveTowardsTarget(Vector3 target, float speed)
-    {
-        Vector3 direction = (target - controller.transform.position);
-        direction.y = 0f; 
-        
-        if (direction.sqrMagnitude > 0.1f)
-        {
-            controller.transform.rotation = Quaternion.Slerp(
-                controller.transform.rotation,
-                Quaternion.LookRotation(direction),
-                controller.rotationSpeed * Time.deltaTime
-            );
-            
-            controller.transform.position += direction.normalized * speed * Time.deltaTime;
-        }
+        controller.Steering.MoveToPosition(controller.WaypointSystem.GetCurrentTargetPosition(), controller.walkSpeed);
     }
 
     public override void Sleep()

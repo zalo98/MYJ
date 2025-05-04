@@ -16,23 +16,11 @@ public class Seek : ISteering
     public Vector3 MoveDirection()
     {
         Vector3 desiredVelocity = (target.position - rb.position).normalized * maxVelocity;
-        Vector3 steering = desiredVelocity - rb.linearVelocity;
-        steering.y = 0;
-
-        RotateTowards(desiredVelocity);
-
-        return Vector3.ClampMagnitude(steering, maxVelocity);
-    }
-
-    private void RotateTowards(Vector3 direction)
-    {
-        if (direction.sqrMagnitude < 0.01f)
-            return;
-
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        Quaternion smoothedRotation = Quaternion.RotateTowards(rb.rotation, targetRotation, 360f * Time.deltaTime);
-
-        rb.MoveRotation(smoothedRotation);
+        Vector3 directionForce = desiredVelocity - rb.linearVelocity;
+        directionForce.y = 0;
+        directionForce = Vector3.ClampMagnitude(directionForce, maxVelocity);
+        rb.AddForce(directionForce, ForceMode.Acceleration);
+        return directionForce;
     }
 
     public void SetMaxVelocity(float newMaxVelocity)

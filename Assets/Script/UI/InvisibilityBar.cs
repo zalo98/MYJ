@@ -1,50 +1,98 @@
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
+using UnityEngine.SceneManagement;
 
 public class InvisibilityBar : MonoBehaviour
 {
-    [SerializeField] private Image fillImage;
-    [SerializeField] private PlayerController playerController;
-    
+    [SerializeField] private TextMeshProUGUI timeText;
+    private PlayerController playerController;
     private PlayerInvisibleState invisibleState;
     private const float maxInvisibleTime = 10f;
+    private bool isInvisible = false;
+    public static InvisibilityBar Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        FindPlayerAndUpdateState();
+    }
+
+    private void FindPlayerAndUpdateState()
+    {
+        playerController = FindObjectOfType<PlayerController>();
+        if (playerController != null)
+        {
+            invisibleState = playerController.GetInvisibleState();
+            UpdateTimeText(maxInvisibleTime);
+        }
+        else
+        {
+            Debug.LogWarning("No se encontró el PlayerController en la escena");
+        }
+    }
 
     private void Start()
     {
-        if (fillImage == null)
+        if (timeText == null)
         {
-            fillImage = GetComponent<Image>();
-            if (fillImage == null)
+            timeText = GetComponent<TextMeshProUGUI>();
+            if (timeText == null)
             {
-                Debug.LogError("No se encontró el componente Image en la barra de invisibilidad");
+                Debug.LogError("No se encontró el componente TextMeshProUGUI en la barra de invisibilidad");
                 return;
             }
         }
 
-        if (playerController == null)
-        {
-            Debug.LogError("No se asignó el PlayerController en el Inspector");
-            return;
-        }
-        
-        invisibleState = playerController.GetInvisibleState();
-        if (invisibleState == null)
-        {
-            Debug.LogError("No se pudo obtener el estado invisible del PlayerController");
-            return;
-        }
+        FindPlayerAndUpdateState();
     }
 
     private void Update()
     {
-        if (fillImage == null || invisibleState == null)
+        if (timeText == null || invisibleState == null)
         {
             return;
         }
         
         float remainingTime = invisibleState.GetRemainingInvisibleTime();
-        float fillAmount = remainingTime / maxInvisibleTime;
-        fillAmount = Mathf.Clamp01(fillAmount);
-        fillImage.fillAmount = fillAmount;
+        bool currentInvisibleState = remainingTime > 0;
+        
+        if (currentInvisibleState != isInvisible || currentInvisibleState)
+        {
+            UpdateTimeText(remainingTime);
+            isInvisible = currentInvisibleState;
+        }
+    }
+
+    private void UpdateTimeText(float time)
+    {
+        if (time <= 0)
+        {
+            timeText.text = "Tiempo restante: 0.0s";
+        }
+        else
+        {
+            timeText.text = $"Tiempo restante: {time:F1}s";
+        }
     }
 }

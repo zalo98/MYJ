@@ -96,7 +96,7 @@ public class AttackDecisionTree
         ActionNode patrullar = new ActionNode(() => { fsm.Transition(StateEnum.EnemyPatrol); isRotating = false; });
         
         QuestionNode estaGirando = new QuestionNode(atacar, patrullar, () => currentSearchTime > 0f);
-        rootNode = new QuestionNode(atacar, estaGirando, () => enemy.enemyVision.HasDirectDetection);
+        rootNode = new QuestionNode(atacar, estaGirando, () => enemy.enemyVision.HasDirectDetection || enemy.enemyVision.HasPeripheralDetection);
     }
 
     public void StopRotation()

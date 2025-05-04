@@ -46,6 +46,6 @@ public class AttackState : State
     private void Attack()
     {
         Debug.Log("Enemigo ha atacado al jugador!");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        SceneManager.LoadScene("LoseScene");
     }
 }

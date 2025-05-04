@@ -10,32 +10,48 @@ public class PlayerAnimationController : MonoBehaviour
     private void Awake()
     {
         animator = GetComponent<Animator>();
-        if (animator == null)
-        {
-            Debug.LogError("No se encontró el componente Animator en el jugador");
-        }
     }
 
     public void PlayIdleAnimation()
     {
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null) return;
+        }
         animator.SetBool(ANIM_WALK, false);
         animator.SetBool(ANIM_RUN, false);
     }
 
     public void PlayWalkAnimation()
     {
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null) return;
+        }
         animator.SetBool(ANIM_WALK, true);
         animator.SetBool(ANIM_RUN, false);
     }
 
     public void PlayRunAnimation()
     {
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null) return;
+        }
         animator.SetBool(ANIM_RUN, true);
         animator.SetBool(ANIM_WALK, false);
     }
 
     public void PlayInvisibleAnimation()
     { 
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null) return;
+        }
         animator.SetBool(ANIM_WALK, false);
         animator.SetBool(ANIM_RUN, false);
     }

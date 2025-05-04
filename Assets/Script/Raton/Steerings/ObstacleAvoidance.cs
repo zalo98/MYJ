@@ -8,27 +8,29 @@ public class ObstacleAvoidance : MonoBehaviour
 
     public Vector3 Avoid()
     {
-        Collider[] colliders = Physics.OverlapSphere(transform.position, detectionRange, obstacleMask);
-        Collider closest = null;
-        float minDistance = detectionRange;
+        var colliders = Physics.OverlapSphere(transform.position, detectionRange, obstacleMask);
 
-        foreach (var col in colliders)
+        float minDist = detectionRange + 1;
+        Collider closestCol = null;
+
+        for (int i = 0; i < colliders.Length; i++)
         {
-            float dist = Vector3.Distance(transform.position, col.ClosestPoint(transform.position));
-            if (dist < minDistance)
+            float currentDist = Vector3.Distance(transform.position, colliders[i].ClosestPoint(transform.position));
+            if (currentDist < minDist)
             {
-                closest = col;
-                minDistance = dist;
+                closestCol = colliders[i];
+                minDist = currentDist;
             }
         }
 
-        if (closest == null) return Vector3.zero;
+        if (closestCol == null) return Vector3.zero;
 
-        Vector3 dir = (transform.position - closest.ClosestPoint(transform.position)).normalized;
-        dir.y = 0;
+        Vector3 avoidDir = (transform.position - closestCol.ClosestPoint(transform.position)).normalized;
+        avoidDir.y = 0;
+        avoidDir *= avoidForce;
+        avoidDir *= Mathf.Lerp(1, 0, minDist / detectionRange);
 
-        float forceScale = Mathf.Lerp(1f, 0f, minDistance / detectionRange);
-        return dir * avoidForce * forceScale;
+        return avoidDir;
     }
 
     private void OnDrawGizmos()

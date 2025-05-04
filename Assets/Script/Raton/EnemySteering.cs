@@ -6,7 +6,7 @@ public class EnemySteering : MonoBehaviour
     private Rigidbody rb;
     private WaypointSystem waypointSystem;
 
-    private Seek seekBehavior;
+    public Seek seekBehavior;
     private Flee fleeBehavior;
     private ObstacleAvoidance obstacleAvoidance;
     private Transform targetTransform;
@@ -67,6 +67,13 @@ public class EnemySteering : MonoBehaviour
         {
             UpdateMoveToPosition();
         }
+
+        if (rb.linearVelocity.sqrMagnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(rb.linearVelocity);
+            Quaternion smoothedRotation = Quaternion.Slerp(rb.rotation, targetRotation, 5f * Time.deltaTime);
+            rb.MoveRotation(smoothedRotation);
+        }
     }
 
     public void FollowPath()
@@ -107,9 +114,6 @@ public class EnemySteering : MonoBehaviour
 
     private void ApplySteering(Vector3 force, float maxSpeed)
     {
-        force = Vector3.ClampMagnitude(force, maxSteeringForce);
-        rb.AddForce(force, ForceMode.Acceleration);
-
         if (rb.linearVelocity.magnitude > maxSpeed)
         {
             rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
@@ -133,9 +137,25 @@ public class EnemySteering : MonoBehaviour
 
     public void MoveToPosition(Vector3 target, float speed)
     {
-        Vector3 direction = (target - transform.position).normalized;
-        RotateTowards(direction);
-        rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
+        currentTargetPosition = target;
+        currentMaxSpeed = speed;
+        targetTransform.position = target;
+        
+        Vector3 moveDirection = seekBehavior.MoveDirection();
+        moveDirection.y = 0f;
+        Vector3 avoidance = obstacleAvoidance.Avoid();
+        
+        if (avoidance.sqrMagnitude > 0.1f)
+        {
+            rb.AddForce(avoidance * speed, ForceMode.Acceleration);
+        }
+        
+        rb.AddForce(moveDirection.normalized * speed, ForceMode.Acceleration);
+        
+        if (rb.linearVelocity.magnitude > speed)
+        {
+            rb.linearVelocity = rb.linearVelocity.normalized * speed;
+        }
     }
     
     private void RotateTowards(Vector3 direction)

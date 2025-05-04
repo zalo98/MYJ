@@ -41,6 +41,11 @@ public class PlayerController : MonoBehaviour, ITarget
         ConfigureRigidbody();
         
         InitializeFSM();
+        
+        if (invisibleState != null)
+        {
+            invisibleState.ResetInvisibleTime();
+        }
     }
 
     private void ConfigureRigidbody()
@@ -51,6 +56,8 @@ public class PlayerController : MonoBehaviour, ITarget
 
     private void InitializeFSM()
     {
+        if (fsm != null) return;
+
         fsm = new FSM();
         
         idleState = new PlayerIdleState(fsm, this, animController);
@@ -159,11 +166,17 @@ public class PlayerController : MonoBehaviour, ITarget
             return;
         }
 
-        for (int i = 0; i < interactables.Length; i++)
+        for (int i = 0; i < elements; i++)
         {
             var interactable = interactables[i];
+            
+            if (interactable == null)
+            {
+                continue;
+            }
+            
             var interactableComponent = interactable.GetComponent<IInteractable>();
-
+            
             if (interactableComponent != null)
             {
                 interactableComponent.Interact();
