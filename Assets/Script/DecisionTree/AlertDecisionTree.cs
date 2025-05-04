@@ -78,7 +78,9 @@ public class AlertDecisionTree
                 return;
             }
 
-            enemy.Steering.MoveToPosition(currentTarget.Value, enemy.walkSpeed);
+            // Actualizar la posición del targetTransform y usar MoveToPosition
+            enemy.steering.MoveToPosition(currentTarget.Value, enemy.walkSpeed);
+
             currentTime = alertTimer;
 
             float distance = Vector3.Distance(enemy.transform.position, currentTarget.Value);
@@ -131,8 +133,7 @@ public class AlertDecisionTree
         {
             return;
         }
-
-        // Verificar visión mientras se mueve
+        
         if (enemy.enemyVision.HasDirectDetection)
         {
             rootNode?.Execute();
@@ -148,7 +149,7 @@ public class AlertDecisionTree
         if (Vector3.Distance(enemy.transform.position, target) > 1f)
         {
             currentTarget = target;
-            enemy.Steering.MoveToPosition(target, enemy.walkSpeed);
+            enemy.steering.MoveToPosition(target, enemy.walkSpeed);
             currentTime = alertTimer;
             Debug.Log("Enemigo se mueve hacia la posición marcada por la cámara");
         }
@@ -183,7 +184,7 @@ public class AlertDecisionTree
             if (Vector3.Distance(enemy.transform.position, target) > 1f)
             {
                 currentTarget = target;
-                enemy.Steering.MoveToPosition(target, enemy.walkSpeed);
+                enemy.steering.MoveToPosition(target, enemy.walkSpeed);
                 currentTime = alertTimer;
                 Debug.Log("Enemigo se mueve hacia la última posición del jugador");
             }

@@ -1,11 +1,12 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class EnemyController : MonoBehaviour
 {
     // Referencias a componentes
     [HideInInspector] public FSM StateMachine;
     [HideInInspector] public ILineOfSight LineOfSight;
-    [HideInInspector] public EnemySteering Steering;
+    [HideInInspector] public EnemySteering steering;
     [HideInInspector] public WaypointSystem WaypointSystem;
     [HideInInspector] public Transform PlayerTransform;
 
@@ -40,14 +41,14 @@ public class EnemyController : MonoBehaviour
             enemyVision = GetComponent<EnemyVision>();
         }
         LineOfSight = GetComponent<ILineOfSight>();
-        Steering = GetComponent<EnemySteering>();
+        steering = GetComponent<EnemySteering>();
         EnemyAnimator = GetComponent<Animator>();
         WaypointSystem = GetComponent<WaypointSystem>();
         audioSource = GetComponent<AudioSource>();
 
-        if (Steering != null)
+        if (steering != null)
         {
-            Steering.Initialize();
+            steering.Initialize();
         }
         else
         {
@@ -93,9 +94,9 @@ public class EnemyController : MonoBehaviour
     {
         PlayerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         
-        if (Steering != null)
+        if (steering != null)
         {
-            Steering.Initialize();
+            steering.Initialize();
         }
         
         enemyVision.UpdateDetection();

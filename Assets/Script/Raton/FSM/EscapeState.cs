@@ -31,7 +31,7 @@ public class EscapeState : State
             enemyController.audioSource.Play();
         }
         
-        enemyController.Steering.ReturnToStart();
+        enemyController.steering.ReturnToStart();
         
         if (enemyController.WaypointSystem.HasReachedCurrentTarget(enemyController.transform.position))
         {

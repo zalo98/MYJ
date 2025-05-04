@@ -12,6 +12,7 @@ public class AttackDecisionTree
     private bool isRotating = false;
     private float searchTimer = 5f;
     private float currentSearchTime;
+    private float minAttackDistance = 0.01f;
 
     public AttackDecisionTree(EnemyController enemy, FSM fsm, AttackState attackState)
     {
@@ -32,7 +33,19 @@ public class AttackDecisionTree
     {
         if (enemy.enemyVision.HasDirectDetection || enemy.enemyVision.HasPeripheralDetection)
         {
-            enemy.Steering.MoveToPosition(enemy.enemyVision.LastSeenPosition.Value, enemy.runSpeed);
+            Vector3 targetPosition = enemy.enemyVision.LastSeenPosition.Value;
+            float distance = Vector3.Distance(enemy.transform.position, targetPosition);
+
+            // Si está muy cerca del jugador, mantener el ataque
+            if (distance <= minAttackDistance)
+            {
+                enemy.steering.MoveToPosition(targetPosition, enemy.runSpeed);
+                currentSearchTime = searchTimer;
+                isRotating = false;
+                return;
+            }
+
+            enemy.steering.MoveToPosition(targetPosition, enemy.runSpeed);
             currentSearchTime = searchTimer;
             isRotating = false;
             return;
@@ -59,12 +72,13 @@ public class AttackDecisionTree
             Vector3 lastPosition = enemy.enemyVision.LastSeenPosition.Value;
             float distance = Vector3.Distance(enemy.transform.position, lastPosition);
             
-            if (distance > 1f)
+            if (distance > minAttackDistance)
             {
-                enemy.Steering.MoveToPosition(lastPosition, enemy.runSpeed);
+                enemy.steering.MoveToPosition(lastPosition, enemy.runSpeed);
             }
             else
             {
+                // Si está cerca de la última posición conocida, seguir buscando
                 isRotating = true;
                 Debug.Log("Enemigo empieza a buscar al jugador");
             }
@@ -87,7 +101,19 @@ public class AttackDecisionTree
         ActionNode atacar = new ActionNode(() => { 
             if (enemy.enemyVision.LastSeenPosition.HasValue)
             {
-                enemy.Steering.MoveToPosition(enemy.enemyVision.LastSeenPosition.Value, enemy.runSpeed); 
+                Vector3 targetPosition = enemy.enemyVision.LastSeenPosition.Value;
+                float distance = Vector3.Distance(enemy.transform.position, targetPosition);
+
+                // Si está muy cerca del jugador, mantener el ataque
+                if (distance <= minAttackDistance)
+                {
+                    enemy.steering.MoveToPosition(targetPosition, enemy.runSpeed);
+                    currentSearchTime = searchTimer;
+                    isRotating = false;
+                    return;
+                }
+
+                enemy.steering.MoveToPosition(targetPosition, enemy.runSpeed);
                 currentSearchTime = searchTimer;
                 isRotating = false;
             }

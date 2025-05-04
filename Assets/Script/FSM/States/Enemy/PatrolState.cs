@@ -42,7 +42,7 @@ public class PatrolState : State
             }
         }
 
-        controller.Steering.MoveToPosition(controller.WaypointSystem.GetCurrentTargetPosition(), controller.walkSpeed);
+        controller.steering.MoveToPosition(controller.WaypointSystem.GetCurrentTargetPosition(), controller.walkSpeed);
     }
 
     public override void Sleep()

@@ -19,7 +19,17 @@ public class MouseEscapeState : State
 
     public override void Execute()
     {
-        EvadePlayer();
+        if (controller.steering != null)
+        {
+            Vector3 moveDirection = controller.steering.FleeBehavior.MoveDirection();
+            moveDirection.y = 0f;
+
+            if (moveDirection.sqrMagnitude > 0.001f)
+            {
+                controller.transform.rotation = Quaternion.LookRotation(moveDirection.normalized);
+                controller.transform.position += moveDirection.normalized * controller.runSpeed * Time.deltaTime;
+            }
+        }
         
         controller.enemyVision.UpdateDetection();
         
@@ -36,27 +46,6 @@ public class MouseEscapeState : State
         else
         {
             escapeTimer = 0f;
-        }
-    }
-
-    private void EvadePlayer()
-    {
-        if (controller.Steering != null)
-        {
-            Flee fleeBehavior = controller.Steering.FleeBehavior;
-
-            if (fleeBehavior != null)
-            {
-                Vector3 moveDirection = fleeBehavior.MoveDirection();
-                moveDirection.y = 0f;
-
-                if (moveDirection.sqrMagnitude > 0.001f)
-                {
-                    controller.transform.rotation = Quaternion.LookRotation(moveDirection.normalized);
-                }
-
-                controller.transform.position += moveDirection.normalized * controller.runSpeed * Time.deltaTime;
-            }
         }
     }
 
