@@ -19,6 +19,7 @@ public class AlertSystem : MonoBehaviour
     }
 
     private List<EnemyController> enemiesInPatrol = new List<EnemyController>();
+    private List<EnemyController> enemiesInLooking = new List<EnemyController>();
 
     private void Awake()
     {
@@ -41,9 +42,18 @@ public class AlertSystem : MonoBehaviour
         }
     }
 
+    public void RegisterEnemyInLooking(EnemyController enemy)
+    {
+        if (!enemiesInLooking.Contains(enemy))
+        {
+            enemiesInLooking.Add(enemy);
+        }
+    }
+
     public void UnregisterEnemy(EnemyController enemy)
     {
         enemiesInPatrol.Remove(enemy);
+        enemiesInLooking.Remove(enemy);
     }
 
     public void AlertEnemies(Vector3 position)
@@ -53,6 +63,20 @@ public class AlertSystem : MonoBehaviour
         foreach (var enemy in enemiesToAlert)
         {
             if (enemiesInPatrol.Contains(enemy) && enemy.StateMachine._currentState == enemy.PatrolState)
+            {
+                enemy.StateMachine.Transition(StateEnum.EnemyAlert);
+                if (enemy.StateMachine._currentState is AlertState alertState)
+                {
+                    alertState.decisionTree.AlertByCamera(position);
+                }
+            }
+        }
+        
+        List<EnemyController> lookingEnemiesToAlert = new List<EnemyController>(enemiesInLooking);
+        
+        foreach (var enemy in lookingEnemiesToAlert)
+        {
+            if (enemiesInLooking.Contains(enemy) && enemy.StateMachine._currentState == enemy.EnemylookingState)
             {
                 enemy.StateMachine.Transition(StateEnum.EnemyAlert);
                 if (enemy.StateMachine._currentState is AlertState alertState)

@@ -20,6 +20,8 @@ public class EnemyLookingState : State
         controller.EnemyAnimator.SetBool("IsRunning", false);
         controller.EnemyAnimator.SetBool("IsLooking", true);
 
+        AlertSystem.Instance.RegisterEnemyInLooking(controller);
+
         lookingCoroutine = coroutineHost.StartCoroutine(LookAroundCoroutine());
     }
 

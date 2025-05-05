@@ -72,6 +72,7 @@ public class EnemyController : MonoBehaviour
         PatrolState.AddTransition(StateEnum.EnemyLookingState, EnemylookingState);
         
         EnemylookingState.AddTransition(StateEnum.EnemyPatrol, PatrolState);
+        EnemylookingState.AddTransition(StateEnum.EnemyAlert, AlertState);
         
         AlertState.AddTransition(StateEnum.EnemyPatrol, PatrolState);
         AlertState.AddTransition(StateEnum.Attack, AttackState);
