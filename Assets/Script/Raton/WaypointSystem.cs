@@ -3,39 +3,38 @@
 public class WaypointSystem : MonoBehaviour
 {
     [Header("Configuración de Ruta")]
-    public Transform startPoint; // Punto A
-    public Transform endPoint;   // Punto B
-    public Transform[] waypoints; // Puntos intermedios
+    public Transform startPoint;
+    public Transform endPoint;
+    public Transform[] waypoints;
 
     [Header("Configuración de Navegación")]
     public float arrivalRadius = 0.5f;
 
     private int currentWaypointIndex = 0;
-    private int waypointDirection = 1; // 1 adelante, -1 atrás
+    private int waypointDirection = 1;
     private bool reachedEndPoint = false;
-
-    // Variables para el escape
+    
     private bool returningByPath = false;
     private int escapeWaypointIndex = 0;
 
     void Start()
     {
-        // Verificar puntos de ruta
         if (startPoint == null || endPoint == null)
+        {
             Debug.LogError("Waypoints no asignados en WaypointSystem");
+        }
     }
-
-    // Obtener la posición del objetivo actual en modo normal
+    
     public Vector3 GetCurrentTargetPosition()
     {
-        if (!reachedEndPoint) // Ida (A → B)
+        if (!reachedEndPoint)
         {
             if (currentWaypointIndex < waypoints.Length)
                 return waypoints[currentWaypointIndex].position;
             else
                 return endPoint.position;
         }
-        else // Vuelta (B → A)
+        else
         {
             if (currentWaypointIndex >= 0 && currentWaypointIndex < waypoints.Length)
                 return waypoints[currentWaypointIndex].position;
@@ -43,8 +42,7 @@ public class WaypointSystem : MonoBehaviour
                 return startPoint.position;
         }
     }
-
-    // Obtener la posición del objetivo actual en modo escape
+    
     public Vector3 GetEscapeTargetPosition()
     {
         if (escapeWaypointIndex >= 0 && escapeWaypointIndex < waypoints.Length)
@@ -52,8 +50,7 @@ public class WaypointSystem : MonoBehaviour
         else
             return startPoint.position;
     }
-
-    // Verificar si ha llegado al punto de destino actual
+    
     public bool HasReachedCurrentTarget(Vector3 position)
     {
         Vector3 target = GetCurrentTargetPosition();
@@ -86,8 +83,7 @@ public class WaypointSystem : MonoBehaviour
             }
         }
     }
-
-    // Iniciar ruta de escape
+    
     public void StartEscapeRoute()
     {
         returningByPath = true;
@@ -97,11 +93,9 @@ public class WaypointSystem : MonoBehaviour
     public bool MoveToNextEscapePoint()
     {
         escapeWaypointIndex--;
-
-        // Si ya no hay más waypoints para el escape
+        
         if (escapeWaypointIndex < 0)
         {
-            // Si estamos lo suficientemente cerca del punto inicial
             float distanceToStart = Vector3.Distance(transform.position, startPoint.position);
             if (distanceToStart <= arrivalRadius)
             {
@@ -113,8 +107,7 @@ public class WaypointSystem : MonoBehaviour
 
         return false;
     }
-
-    // Reiniciar al estado inicial
+    
     public void ResetToStart()
     {
         reachedEndPoint = false;
@@ -122,35 +115,34 @@ public class WaypointSystem : MonoBehaviour
         waypointDirection = 1;
         returningByPath = false;
     }
-
-    // Determinar el waypoint anterior más cercano (para escape)
+    
     private int DetermineClosestPreviousWaypoint()
     {
-        // Si no hay waypoints, retornar -1 para ir directo al punto inicial
         if (waypoints == null || waypoints.Length == 0)
+        {
             return -1;
+        }
 
-        // Si ya había pasado todos los waypoints y estaba dirigiéndose al punto final
         if (currentWaypointIndex >= waypoints.Length)
+        {
             return waypoints.Length - 1;
+        }
 
-        // Si estaba de regreso (después de alcanzar el endpoint)
         if (reachedEndPoint)
+        {
             return currentWaypointIndex;
-
-        // Si estaba camino hacia adelante, usar el índice actual - 1
+        }
+        
         return Mathf.Max(0, currentWaypointIndex - 1);
     }
-
-    // Verificar si ha llegado al punto de destino de escape actual
+    
     public bool HasReachedEscapeTarget(Vector3 position)
     {
         Vector3 target = GetEscapeTargetPosition();
         float distance = Vector3.Distance(position, target);
         return distance <= arrivalRadius;
     }
-
-    // Para visualización de la ruta en el editor
+    
     void OnDrawGizmosSelected()
     {
         if (startPoint != null && endPoint != null && waypoints != null)
@@ -182,8 +174,7 @@ public class WaypointSystem : MonoBehaviour
                     Gizmos.DrawSphere(waypoint.position, 0.3f);
                 }
             }
-
-            // Dibujar radio de llegada
+            
             Gizmos.color = new Color(0, 1, 0, 0.2f);
             Gizmos.DrawSphere(GetCurrentTargetPosition(), arrivalRadius);
         }

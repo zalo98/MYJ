@@ -123,6 +123,9 @@ GameObject:
   - component: {fileID: 3276557889790727217}
   - component: {fileID: -867984324709496100}
   - component: {fileID: -602133636699035102}
+  - component: {fileID: -2378859111894066061}
+  - component: {fileID: 3076578799344143662}
+  - component: {fileID: 1223757692821126832}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -270,7 +273,8 @@ MonoBehaviour:
     m_Bits: 64
   obstacleMask:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 136
+  usePeripheralVision: 1
 --- !u!114 &-602133636699035102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -283,8 +287,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c78a0732b2ecf944f91bb3700e51d7a7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LineOfSight: {fileID: 0}
-  Steering: {fileID: 0}
+  steering: {fileID: 0}
   WaypointSystem: {fileID: 0}
   PlayerTransform: {fileID: 0}
   EnemyAnimator: {fileID: 0}
@@ -293,3 +296,56 @@ MonoBehaviour:
   runSpeed: 5
   rotationSpeed: 120
   escapeSound: {fileID: 8300000, guid: e0db0f1a92e98e84099e0e58a5ef6673, type: 3}
+  enemyVision: {fileID: -867984324709496100}
+  obstacleAvoidance: {fileID: 1223757692821126832}
+--- !u!114 &-2378859111894066061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8869817387591332274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07f9a49ed9c1b3a40813a17e9451c509, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 0}
+  currentVelocity: {x: 0, y: 0, z: 0}
+  currentTargetPosition: {x: 0, y: 0, z: 0}
+  currentMaxSpeed: 0
+  maxSteeringForce: 10
+  obstacleAvoidanceWeight: 1.5
+--- !u!114 &3076578799344143662
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8869817387591332274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b5917b5abf64fe4093eeafec5bd532a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startPoint: {fileID: 0}
+  endPoint: {fileID: 0}
+  waypoints: []
+  arrivalRadius: 0.5
+--- !u!114 &1223757692821126832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8869817387591332274}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e24a37ac209e1d644a82baeb0dec7049, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectionRange: 5
+  avoidForce: 5
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 8

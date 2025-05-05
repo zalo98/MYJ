@@ -15,6 +15,7 @@ public class AlertState : State
     public override void Awake()
     {
         Debug.Log("Entering AlertState");
+        controller.EnemyAnimator.SetBool("IsLooking", true);
 
         enemyVision = controller.GetComponent<EnemyVision>();
         playerTransform = GameObject.FindGameObjectWithTag("Player")?.transform;
@@ -47,6 +48,7 @@ public class AlertState : State
     public override void Sleep()
     {
         Debug.Log("Exiting AlertState");
+        controller.EnemyAnimator.SetBool("IsLooking", false);
         decisionTree = null;
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 public class PatrolState : State
 {
     private EnemyController controller;
-    private float patrolDelay = 1f;
+    private float patrolDelay = 0f;
     private float timeSpentAtWaypoint = 0f;
 
     public PatrolState(EnemyController controller, FSM fsm) : base(fsm)
@@ -15,6 +15,7 @@ public class PatrolState : State
     {
         timeSpentAtWaypoint = 0f;
         AlertSystem.Instance.RegisterEnemy(controller);
+        controller.EnemyAnimator.SetBool("IsWalking", true);
         Debug.Log("Enemigo entró a PatrolState");
     }
 
@@ -37,8 +38,8 @@ public class PatrolState : State
 
             if (timeSpentAtWaypoint > patrolDelay)
             {
-                controller.WaypointSystem.MoveToNextTarget();
-                timeSpentAtWaypoint = 0f;
+                controller.StateMachine.Transition(StateEnum.EnemyLookingState);
+                return;
             }
         }
 
@@ -48,5 +49,6 @@ public class PatrolState : State
     public override void Sleep()
     {
         AlertSystem.Instance.UnregisterEnemy(controller);
+        controller.EnemyAnimator.SetBool("IsWalking", false);
     }
 }

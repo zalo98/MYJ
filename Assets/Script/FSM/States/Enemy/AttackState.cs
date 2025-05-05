@@ -19,6 +19,7 @@ public class AttackState : State
         enemyVision = enemyController.GetComponent<EnemyVision>();
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
         attackDecisionTree.StartAttack();
+        enemyController.EnemyAnimator.SetBool("IsRunning", true);
     }
 
     public override void Execute()
@@ -35,6 +36,11 @@ public class AttackState : State
         {
             Attack();
         }
+    }
+
+    public override void Sleep()
+    {
+        enemyController.EnemyAnimator.SetBool("IsRunning", false);
     }
 
     private bool IsCollidingWithPlayer()

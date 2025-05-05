@@ -35,8 +35,7 @@ public class AttackDecisionTree
         {
             Vector3 targetPosition = enemy.enemyVision.LastSeenPosition.Value;
             float distance = Vector3.Distance(enemy.transform.position, targetPosition);
-
-            // Si está muy cerca del jugador, mantener el ataque
+            
             if (distance <= minAttackDistance)
             {
                 enemy.steering.MoveToPosition(targetPosition, enemy.runSpeed);
@@ -78,7 +77,6 @@ public class AttackDecisionTree
             }
             else
             {
-                // Si está cerca de la última posición conocida, seguir buscando
                 isRotating = true;
                 Debug.Log("Enemigo empieza a buscar al jugador");
             }
@@ -103,8 +101,7 @@ public class AttackDecisionTree
             {
                 Vector3 targetPosition = enemy.enemyVision.LastSeenPosition.Value;
                 float distance = Vector3.Distance(enemy.transform.position, targetPosition);
-
-                // Si está muy cerca del jugador, mantener el ataque
+                
                 if (distance <= minAttackDistance)
                 {
                     enemy.steering.MoveToPosition(targetPosition, enemy.runSpeed);
