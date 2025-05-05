@@ -6,7 +6,7 @@ public class PatrolState : State
     private float patrolDelay = 0f;
     private float timeSpentAtWaypoint = 0f;
     private int waypointCounter = 0;
-    private int waypointLooking = 4;
+    private int waypointLooking;
 
     public PatrolState(EnemyController controller, FSM fsm) : base(fsm)
     {
@@ -16,6 +16,8 @@ public class PatrolState : State
     public override void Awake()
     {
         timeSpentAtWaypoint = 0f;
+        waypointCounter = 0;
+        waypointLooking = Mathf.RoundToInt(Randoms.RandomRange(3f, 5f));
         AlertSystem.Instance.RegisterEnemy(controller);
         controller.EnemyAnimator.SetBool("IsWalking", true);
         Debug.Log("Enemigo entró a PatrolState");
