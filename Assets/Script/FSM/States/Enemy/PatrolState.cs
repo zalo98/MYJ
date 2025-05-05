@@ -5,6 +5,8 @@ public class PatrolState : State
     private EnemyController controller;
     private float patrolDelay = 0f;
     private float timeSpentAtWaypoint = 0f;
+    private int waypointCounter = 0;
+    private int waypointLooking = 4;
 
     public PatrolState(EnemyController controller, FSM fsm) : base(fsm)
     {
@@ -38,8 +40,19 @@ public class PatrolState : State
 
             if (timeSpentAtWaypoint > patrolDelay)
             {
-                controller.StateMachine.Transition(StateEnum.EnemyLookingState);
-                return;
+                waypointCounter++;
+                
+                if (waypointCounter >= waypointLooking)
+                {
+                    waypointCounter = 0;
+                    controller.StateMachine.Transition(StateEnum.EnemyLookingState);
+                    return;
+                }
+                else
+                {
+                    controller.WaypointSystem.MoveToNextTarget();
+                    timeSpentAtWaypoint = 0f;
+                }
             }
         }
 
