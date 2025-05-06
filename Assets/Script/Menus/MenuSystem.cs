@@ -5,7 +5,7 @@ public class MenuSystem : MonoBehaviour
 {
     public void Play()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        SceneManager.LoadScene("Nivel1");
     }
     public void Exit()
     {
@@ -19,6 +19,6 @@ public class MenuSystem : MonoBehaviour
 
     public void Retry()
     {
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("Nivel1");
     }
 }

@@ -88,7 +88,7 @@ public class InvisibilityBar : MonoBehaviour
     {
         if (time <= 0)
         {
-            timeText.text = "Tiempo restante: 0.0s";
+            timeText.text = "remaining invisibility: 0.0s";
         }
         else
         {

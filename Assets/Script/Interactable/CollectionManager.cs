@@ -53,7 +53,7 @@ public class CollectionManager : MonoBehaviour
     {
         if (countText != null)
         {
-            countText.text = $"Capturados: {captureCount}/{victoryTarget}";
+            countText.text = $"Captured mice: {captureCount}/{victoryTarget}";
         }
     }
 
