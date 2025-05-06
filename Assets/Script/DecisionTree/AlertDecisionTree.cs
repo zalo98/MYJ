@@ -11,6 +11,7 @@ public class AlertDecisionTree
     private float decisionTimer = 0f;
     private float alertTimer = 10f;
     private float currentTime;
+    private float stopDistance = 3f;
 
     private bool isRotating = false;
     public Vector3? currentTarget = null;
@@ -77,8 +78,7 @@ public class AlertDecisionTree
                 AlertLookOrMove();
                 return;
             }
-
-            // Actualizar la posición del targetTransform y usar MoveToPosition
+            
             enemy.steering.MoveToPosition(currentTarget.Value, enemy.walkSpeed);
 
             currentTime = alertTimer;
@@ -146,7 +146,7 @@ public class AlertDecisionTree
         }
 
         Vector3 target = cameraAlertPosition.Value;
-        if (Vector3.Distance(enemy.transform.position, target) > 1f)
+        if (Vector3.Distance(enemy.transform.position, target) > stopDistance)
         {
             currentTarget = target;
             enemy.steering.MoveToPosition(target, enemy.walkSpeed);
@@ -155,7 +155,7 @@ public class AlertDecisionTree
         }
         else
         {
-            Debug.Log("Ya está en la posición marcada por la cámara");
+            Debug.Log("Ya está cerca de la posición marcada por la cámara");
             isRotating = true;
         }
     }
@@ -163,9 +163,10 @@ public class AlertDecisionTree
     private void AlertLookOrMove()
     {
         if (!enemy.enemyVision.LastSeenPosition.HasValue)
+        {
             return;
-
-        // Verificar visión antes de decidir qué hacer
+        }
+        
         if (enemy.enemyVision.HasDirectDetection)
         {
             rootNode?.Execute();
