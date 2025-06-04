@@ -7,7 +7,7 @@ public class EnemyController : MonoBehaviour
     [HideInInspector] public FSM StateMachine;
     [HideInInspector] public ILineOfSight LineOfSight;
     [HideInInspector] public EnemySteering steering;
-    [HideInInspector] public WaypointSystem WaypointSystem;
+    [HideInInspector] public MouseMovement mouseMovement;
     [HideInInspector] public Transform PlayerTransform;
 
     // Referencias a estados
@@ -43,7 +43,7 @@ public class EnemyController : MonoBehaviour
         LineOfSight = GetComponent<ILineOfSight>();
         steering = GetComponent<EnemySteering>();
         EnemyAnimator = GetComponent<Animator>();
-        WaypointSystem = GetComponent<WaypointSystem>();
+        mouseMovement = GetComponent<MouseMovement>();
         audioSource = GetComponent<AudioSource>();
 
         if (steering != null)

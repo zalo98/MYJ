@@ -4,7 +4,8 @@ public class EnemySteering : MonoBehaviour
 {
     [HideInInspector] public EnemyController controller;
     private Rigidbody rb;
-    private WaypointSystem waypointSystem;
+    public MouseMovement mouseMovement;
+    private EnemyVision enemyVision;
 
     public Seek seekBehavior;
     private Flee fleeBehavior;
@@ -28,8 +29,9 @@ public class EnemySteering : MonoBehaviour
     {
         controller = GetComponent<EnemyController>();
         rb = GetComponent<Rigidbody>();
-        waypointSystem = GetComponent<WaypointSystem>();
+        mouseMovement = GetComponent<MouseMovement>();
         obstacleAvoidance = GetComponent<ObstacleAvoidance>();
+        enemyVision = GetComponent<EnemyVision>();
 
         if (rb == null)
         {
@@ -40,8 +42,8 @@ public class EnemySteering : MonoBehaviour
         if (obstacleAvoidance == null)
             obstacleAvoidance = gameObject.AddComponent<ObstacleAvoidance>();
 
-        if (waypointSystem == null)
-            Debug.LogError("No se encontró componente WaypointSystem");
+        if (mouseMovement == null)
+            Debug.LogError("No se encontró componente MouseMovement");
 
         GameObject targetObj = new GameObject("TargetPoint");
         targetTransform = targetObj.transform;
@@ -78,42 +80,152 @@ public class EnemySteering : MonoBehaviour
 
     public void FollowPath()
     {
-        if (movingToPosition) return;
+        // Actualizar detección de enemigos
+        if (enemyVision != null)
+            enemyVision.UpdateDetection();
 
-        Vector3 target;
-        float speed;
+        // PRIMERO: Verificar si detecta al player antes de cualquier movimiento
+        if (!escaping && IsPlayerDetected())
+        {
+            Debug.Log("♟️ Player detectado! Iniciando escape táctico hacia punto A");
+            StartEscapeMode();
+        }
+
+        // Actualizar el path si es necesario
+        mouseMovement.UpdatePath();
 
         if (escaping)
         {
-            target = waypointSystem.GetEscapeTargetPosition();
-            speed = controller.runSpeed;
+            // MODO ESCAPE TÁCTICO - Usando pathfinding que evita player pero va hacia A
+            Vector3 target = mouseMovement.GetCurrentTargetPosition();
+            currentTargetPosition = target;
+            currentMaxSpeed = controller.runSpeed;
 
-            if (waypointSystem.HasReachedEscapeTarget(transform.position) &&
-                !waypointSystem.MoveToNextEscapePoint())
+            // 1. Dirección principal hacia el nodo táctico calculado
+            Vector3 dirToTarget = (target - transform.position).normalized * controller.runSpeed;
+
+            // 2. Evasión de obstáculos físicos (paredes, etc)
+            Vector3 obstacleAvoidForce = obstacleAvoidance.Avoid();
+
+            // 3. NO usar AvoidPlayer aquí - el pathfinding táctico ya evita al player
+            // El flee está "integrado" en la selección de nodos del pathfinding
+
+            // 4. Combinar fuerzas - priorizar el pathfinding táctico
+            Vector3 combinedForce;
+
+            if (obstacleAvoidForce.magnitude > 0.1f)
             {
-                escaping = false;
-                waypointSystem.ResetToStart();
+                // Si hay obstáculo físico inmediato, evitarlo pero mantener dirección general
+                combinedForce = (dirToTarget * 1.8f) + (obstacleAvoidForce * 2.2f);
+            }
+            else
+            {
+                // Camino libre - seguir el pathfinding táctico puro
+                combinedForce = dirToTarget * 2f;
+            }
+
+            ApplySteering(combinedForce, controller.runSpeed);
+
+            // Debug visual del pathfinding táctico
+            Debug.DrawRay(transform.position, dirToTarget.normalized * 3f, Color.cyan, 0.1f);
+            Debug.DrawRay(transform.position, obstacleAvoidForce.normalized * 2f, Color.red, 0.1f);
+
+            // Verificar progreso del escape táctico
+            if (mouseMovement.HasReachedCurrentTarget(transform.position))
+            {
+                mouseMovement.MoveToNextTarget();
+
+                // Si llegó al punto A, verificar si terminar escape
+                if (Vector3.Distance(transform.position, mouseMovement.startPoint.position) <= mouseMovement.arrivalRadius)
+                {
+                    if (!IsPlayerDetected() || IsInSafeZone())
+                    {
+                        CompleteEscape();
+                    }
+                    else
+                    {
+                        // Quedarse en punto A hasta que sea seguro
+                        Debug.Log("🏠 En punto A pero player aún visible - esperando...");
+                    }
+                }
+            }
+
+            // Verificar si el player se fue y está en zona segura
+            if (!IsPlayerDetected() && IsInSafeZone())
+            {
+                Debug.Log("✅ Player ya no detectado y en zona segura - terminando escape");
+                CompleteEscape();
             }
         }
         else
         {
-            target = waypointSystem.GetCurrentTargetPosition();
-            speed = controller.walkSpeed;
+            // MODO PATRULLAJE NORMAL (sin cambios)
+            Vector3 target = mouseMovement.GetCurrentTargetPosition();
+            currentTargetPosition = target;
+            currentMaxSpeed = controller.walkSpeed;
+
+            Vector3 dirToTarget = (target - transform.position).normalized * controller.walkSpeed;
+            Vector3 avoidForce = obstacleAvoidance.Avoid();
+            Vector3 combinedForce = dirToTarget + avoidForce * obstacleAvoidanceWeight;
+
+            ApplySteering(combinedForce, controller.walkSpeed);
+
+            if (mouseMovement.HasReachedCurrentTarget(transform.position))
+            {
+                mouseMovement.MoveToNextTarget();
+            }
         }
+    }
 
-        currentTargetPosition = target;
-        currentMaxSpeed = speed;
-        targetTransform.position = target;
+    bool IsPlayerDetected()
+    {
+        if (enemyVision == null) return false;
+        return enemyVision.HasDirectDetection || enemyVision.HasPeripheralDetection;
+    }
 
-        Vector3 steering = seekBehavior.MoveDirection();
-        Vector3 avoid = obstacleAvoidance.Avoid();
-        Vector3 combined = steering + avoid * obstacleAvoidanceWeight;
+    bool IsInSafeZone()
+    {
+        float safeDistance = 4f; // Zona segura alrededor del punto A
+        return Vector3.Distance(transform.position, mouseMovement.startPoint.position) <= safeDistance;
+    }
 
-        ApplySteering(combined, speed);
+    public void CompleteEscape()
+    {
+        escaping = false;
+        mouseMovement.ResetToStart();
+
+        Debug.Log("🏠 Escape completado - resumiendo patrullaje normal");
+
+        // Opcional: Cambiar animación
+        var animController = GetComponent<EnemyAnimationController>();
+        if (animController != null)
+            animController.SetRunning(false);
+    }
+
+    public void StartEscapeMode()
+    {
+        if (escaping) return; // Ya está escapando
+
+        escaping = true;
+        mouseMovement.StartEscape();
+
+        Debug.Log("🏃‍♂️ ESCAPE TÁCTICO INICIADO - Dirigiéndose al punto A");
+
+        // Opcional: Cambiar animación
+        var animController = GetComponent<EnemyAnimationController>();
+        if (animController != null)
+            animController.SetRunning(true);
     }
 
     private void ApplySteering(Vector3 force, float maxSpeed)
     {
+        // Limitar la fuerza máxima
+        force = Vector3.ClampMagnitude(force, maxSteeringForce);
+
+        // Aplicar fuerza
+        rb.AddForce(force, ForceMode.Acceleration);
+
+        // Limitar velocidad máxima
         if (rb.linearVelocity.magnitude > maxSpeed)
         {
             rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
@@ -122,15 +234,14 @@ public class EnemySteering : MonoBehaviour
 
     public void ReturnToStart()
     {
-        if (waypointSystem != null)
+        if (!escaping)
         {
-            waypointSystem.ResetToStart();
-            escaping = false;
+            escaping = true;
+            mouseMovement.StartEscape();
         }
-        else
-        {
-            Debug.LogError("No se pudo encontrar WaypointSystem al intentar regresar al inicio.");
-        }
+
+        // El resto de la lógica ya está en FollowPath()
+        FollowPath();
     }
 
     public Flee FleeBehavior => fleeBehavior;

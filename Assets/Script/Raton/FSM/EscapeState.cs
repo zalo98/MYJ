@@ -33,7 +33,7 @@ public class EscapeState : State
         
         enemyController.steering.ReturnToStart();
         
-        if (enemyController.WaypointSystem.HasReachedCurrentTarget(enemyController.transform.position))
+        if (enemyController.mouseMovement.HasReachedCurrentTarget(enemyController.transform.position))
         {
             enemyController.StateMachine.Transition(StateEnum.EnemyPatrol);
         }
@@ -41,7 +41,7 @@ public class EscapeState : State
 
     public override void Sleep()
     {
-        enemyController.WaypointSystem.ResetToStart();
+        enemyController.mouseMovement.ResetToStart();
         
         enemyController.audioSource.Stop();
     }

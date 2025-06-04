@@ -26,7 +26,7 @@ public class MousePatrolState : State
             return;
         }
         
-        if (controller.WaypointSystem.HasReachedCurrentTarget(controller.transform.position))
+        if (controller.mouseMovement.HasReachedCurrentTarget(controller.transform.position))
         {
             timeSpentAtWaypoint += Time.deltaTime;
             if (timeSpentAtWaypoint > patrolDelay)
@@ -39,12 +39,12 @@ public class MousePatrolState : State
                     return;
                 }
                 
-                controller.WaypointSystem.MoveToNextTarget();
+                controller.mouseMovement.MoveToNextTarget();
                 timeSpentAtWaypoint = 0f;
             }
         }
         
-        controller.steering.MoveToPosition(controller.WaypointSystem.GetCurrentTargetPosition(), controller.walkSpeed);
+        controller.steering.MoveToPosition(controller.mouseMovement.GetCurrentTargetPosition(), controller.walkSpeed);
     }
 
     public override void Sleep()

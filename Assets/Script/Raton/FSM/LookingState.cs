@@ -75,7 +75,7 @@ public class LookingState : State
         }
 
         // Volver a patrullar
-        controller.WaypointSystem.MoveToNextTarget();
+        controller.mouseMovement.MoveToNextTarget();
         controller.StateMachine.Transition(StateEnum.MousePatrolState);
     }
 }

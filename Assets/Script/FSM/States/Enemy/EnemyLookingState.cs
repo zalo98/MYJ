@@ -79,7 +79,7 @@ public class EnemyLookingState : State
             yield return null;
         }
         
-        controller.WaypointSystem.MoveToNextTarget();
+        controller.mouseMovement.MoveToNextTarget();
         controller.StateMachine.Transition(StateEnum.EnemyPatrol);
     }
 }
