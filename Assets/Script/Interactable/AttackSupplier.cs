@@ -2,7 +2,12 @@ using UnityEngine;
 
 public class AttackSupplier : MonoBehaviour, IInteractable
 {
-    [SerializeField] private PlayerController playerController;
+    private PlayerController playerController;
+
+    private void Start()
+    {
+        playerController = FindObjectOfType<PlayerController>();
+    }
     
     public void Interact()
     {

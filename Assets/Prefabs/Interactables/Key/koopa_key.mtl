@@ -1,0 +1,8 @@
+newmtl mat_koopa_key
+Ka 0.6901961 0.6901961 0.6901961
+Kd 0.972549 0.972549 0.972549
+d 1
+Tr 1
+map_Ka mat_koopa_key.png
+map_Kd mat_koopa_key.png
+map_d mat_koopa_key.png

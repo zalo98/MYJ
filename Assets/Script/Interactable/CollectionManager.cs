@@ -6,6 +6,7 @@ public class CollectionManager : MonoBehaviour
     [SerializeField] private int captureCount = 0;
     [SerializeField] private int victoryTarget = 5;
     [SerializeField] private TMPro.TextMeshProUGUI countText;
+    [SerializeField] private GameObject door;
     public static CollectionManager Instance { get; private set; }
 
     private void Awake()
@@ -45,7 +46,7 @@ public class CollectionManager : MonoBehaviour
         
         if (captureCount >= victoryTarget)
         {
-            LoadVictoryScene();
+            Destroy(door);
         }
     }
 
@@ -67,9 +68,5 @@ public class CollectionManager : MonoBehaviour
         captureCount = 0;
         UpdateCountText();
     }
-
-    private void LoadVictoryScene()
-    {
-        SceneManager.LoadScene("WinScene");
-    }
+    
 }

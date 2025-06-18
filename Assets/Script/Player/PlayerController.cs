@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour, ITarget
 {
+    public bool isAttacking = false;
+    public bool hasKey = false;
+    
     private FSM fsm;
     private Rigidbody rb;
     private PlayerAnimationController animController;
@@ -15,7 +18,6 @@ public class PlayerController : MonoBehaviour, ITarget
     [SerializeField] private float runSpeed = 6f;
     [SerializeField] private float rotationSpeed = 10f;
     [SerializeField] private float groundDrag = 5f;
-    public bool isAttacking = false;
     [SerializeField] private float attackDuration = 10f;
     private float attackTimer = 0f;
 
@@ -118,6 +120,11 @@ public class PlayerController : MonoBehaviour, ITarget
         {
             isAttacking = true;
         }
+    }
+
+    public void GetKey()
+    {
+        hasKey = true;
     }
     
     public void ResetAttackTimer()

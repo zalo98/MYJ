@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 
-public class InvisibilitySupplier : MonoBehaviour, IInteractable
+public class Key : MonoBehaviour, IInteractable
 {
     private PlayerController playerController;
 
@@ -8,10 +9,10 @@ public class InvisibilitySupplier : MonoBehaviour, IInteractable
     {
         playerController = FindObjectOfType<PlayerController>();
     }
-    
+
     public void Interact()
     {
-        playerController.ResetInvisibleTime();
+        playerController.GetKey();
         Destroy(gameObject);
     }
 }

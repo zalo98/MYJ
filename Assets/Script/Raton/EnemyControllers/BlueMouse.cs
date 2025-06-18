@@ -9,6 +9,15 @@ public class BlueMouse : EnemyController, IInteractable
     [HideInInspector] public State FlockingAttackState;
     [HideInInspector] public State BlueEscapeState;
 
+    [SerializeField] private GameObject invisibilitySupplierPrefab;
+    [SerializeField] private GameObject attackSupplierPrefab;
+    [SerializeField] private GameObject keyPrefab;
+    
+    [SerializeField] private int baseKeyWeight = 10;
+    [SerializeField] private int baseInvisibilityWeight = 30;
+    [SerializeField] private int baseAttackWeight = 30;
+    [SerializeField] private float keyWeightMultiplier = 2.0f;
+
     private MouseBoid mouseBoid;
     private bool isEscaping = false;
 
@@ -100,10 +109,42 @@ public class BlueMouse : EnemyController, IInteractable
 
     private void Die()
     {
-        if (isEscaping == true)
+        if (isEscaping)
         {
+            SpawnRandomItem();
             Destroy(gameObject);
         }
     }
+    
+    private void SpawnRandomItem()
+    {
+        if (invisibilitySupplierPrefab == null || attackSupplierPrefab == null || keyPrefab == null)
+        {
+            Debug.LogWarning("One or more item prefabs not set in BlueMouse.");
+            return;
+        }
+        
+        int remainingMice = allBlueMice.Count;
+        if (remainingMice <= 1)
+        {
+            Instantiate(keyPrefab, transform.position, Quaternion.identity);
+            return;
+        }
+        
+        int dynamicKeyWeight = Mathf.RoundToInt(baseKeyWeight + (baseKeyWeight * keyWeightMultiplier * (1.0f / Mathf.Max(1, remainingMice))));
+        
+        Dictionary<GameObject, int> itemWeights = new Dictionary<GameObject, int>
+        {
+            { invisibilitySupplierPrefab, baseInvisibilityWeight },
+            { attackSupplierPrefab, baseAttackWeight },
+            { keyPrefab, dynamicKeyWeight }
+        };
+        
+        GameObject selectedItem = Randoms.RandomWeightedObject(itemWeights);
+        
+        if (selectedItem != null)
+        {
+            Instantiate(selectedItem, transform.position, Quaternion.identity);
+        }
+    }
 }
-

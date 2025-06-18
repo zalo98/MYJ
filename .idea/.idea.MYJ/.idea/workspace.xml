@@ -5,34 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b663789-7577-479c-8c1e-c5ea8b6cf52d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Interactables/InvisibilitySupplier.prefab" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Interactables/InvisibilitySupplier.prefab.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Interactables/Supplier.mat" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Interactables/Supplier.mat.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Interactables/Supplier.prefab" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Interactables/Supplier.prefab.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Player/Animaciones/Player.controller" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Player/Animaciones/Player.controller" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.MYJ/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MYJ/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Enemies/BlueMouse/BlueMouse.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Enemies/BlueMouse/BlueMouse.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Gameplay.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Gameplay.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Gameplay/LightingData.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Gameplay/LightingData.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Gameplay/LightingData.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Gameplay/LightingData.asset.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Gameplay/ReflectionProbe-0.exr" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Gameplay/ReflectionProbe-0.exr" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/Gameplay/ReflectionProbe-0.exr.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/Gameplay/ReflectionProbe-0.exr.meta" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/PruebaGonza.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/PruebaGonza.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Script/DecisionTree/BlueMouse/FlockingAttackDecisionTree.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/DecisionTree/BlueMouse/FlockingAttackDecisionTree.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Script/FSM/States/BlueMouse/BlueEscapeState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/FSM/States/BlueMouse/BlueEscapeState.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Script/FSM/States/BlueMouse/FlockingAttackState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/FSM/States/BlueMouse/FlockingAttackState.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Script/FSM/States/BlueMouse/FlockingPatrolState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/FSM/States/BlueMouse/FlockingPatrolState.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Script/Interactable/AttackSupplier.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/Interactable/AttackSupplier.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Script/Interactable/CollectionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/Interactable/CollectionManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Script/Interactable/InvisibilitySupplier.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/Interactable/InvisibilitySupplier.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Script/Player/PlayerController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/Player/PlayerController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Script/Raton/EnemyControllers/BlueMouse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/Raton/EnemyControllers/BlueMouse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PFEntity.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PFEntity.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PFManager.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PFManager.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PFNodeGrid.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PFNodeGrid.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PFNodes.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PFNodes.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PathFinding.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PathFinding.cs.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PriorityQueue.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scripts/PathFinding/PriorityQueue.cs.meta" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,6 +26,11 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/Script/Interactable/FinalDoor.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/Script/Interactable/Key.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/612ea0208cc847f49d539e6511ed3cd51df400/30/a4531821/HideInInspector.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -122,6 +112,8 @@
       <workItem from="1750277200479" duration="380000" />
       <workItem from="1750277600560" duration="2158000" />
       <workItem from="1750279811511" duration="1754000" />
+      <workItem from="1750282257166" duration="4280000" />
+      <workItem from="1750288375453" duration="1113000" />
     </task>
     <servers />
   </component>
