@@ -8,17 +8,22 @@ public class FlockingAttackDecisionTree
     private static float flockSearchTime = 5f;
     private static float rotationDuration = 5f;
     private static BlueMouse leaderMouse = null;
+    private static bool isEscaping = false;
+    private static float escapeTimer = 5f;
 
     private readonly EnemyController enemy;
     private readonly FSM fsm;
     private readonly FlockingAttackState attackState;
     private IDecisionNode rootNode;
     private MouseBoid mouseBoid;
+    private PlayerController playerController;
+    private Flee fleeSteering;
 
     private float decisionInterval = 2f;
     private float decisionTimer = 0f;
     private float minAttackDistance = 0.01f;
     private float attackSpeed;
+    private float escapeSpeed;
 
     public FlockingAttackDecisionTree(EnemyController enemy, FSM fsm, FlockingAttackState attackState)
     {
@@ -26,19 +31,54 @@ public class FlockingAttackDecisionTree
         this.fsm = fsm;
         this.attackState = attackState;
         this.attackSpeed = enemy.runSpeed;
+        this.escapeSpeed = enemy.runSpeed * 1.2f;
 
         mouseBoid = enemy.GetComponent<MouseBoid>();
+        
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            playerController = playerObj.GetComponent<PlayerController>();
+            fleeSteering = new Flee(enemy.GetComponent<Rigidbody>(), playerObj.transform, escapeSpeed);
+        }
+        
+        CreateTree();
     }
 
     public void StartAttack()
     {
-        CreateTree();
         decisionTimer = 0f;
     }
 
     public void Execute()
     {
-        BlueMouse blueMouse = enemy as BlueMouse;
+        if (playerController != null && playerController.isAttacking)
+        {
+            if (!isEscaping)
+            {
+                isEscaping = true;
+                escapeTimer = 5f;
+                
+                BlueMouse blueMouse = enemy as BlueMouse;
+                if (blueMouse != null)
+                {
+                    BlueMouse.BroadcastToAllMice(
+                        StateEnum.BlueEscapeState, 
+                        blueMouse,
+                        enemy.PlayerTransform.position
+                    );
+                }
+                
+                fsm.Transition(StateEnum.BlueEscapeState);
+            }
+            return;
+        }
+        else if (isEscaping)
+        {
+            isEscaping = false;
+        }
+
+        BlueMouse currentMouse = enemy as BlueMouse;
         bool thisMouseSeesPlayer = enemy.enemyVision.HasDirectDetection || enemy.enemyVision.HasPeripheralDetection;
 
         if (thisMouseSeesPlayer)
@@ -51,11 +91,11 @@ public class FlockingAttackDecisionTree
                 BroadcastRotation(false, enemy.enemyVision.LastSeenPosition);
             }
 
-            if (blueMouse != null && enemy.PlayerTransform != null)
+            if (currentMouse != null && enemy.PlayerTransform != null)
             {
                 BlueMouse.BroadcastToAllMice(
                     StateEnum.FlockingAttackState,
-                    blueMouse,
+                    currentMouse,
                     enemy.PlayerTransform.position
                 );
             }
@@ -66,7 +106,7 @@ public class FlockingAttackDecisionTree
             bool anyOtherMouseSeesPlayer = false;
             foreach (var mouse in BlueMouse.GetAllBlueMice())
             {
-                if (mouse != null && mouse != blueMouse &&
+                if (mouse != null && mouse != currentMouse &&
                     (mouse.enemyVision.HasDirectDetection || mouse.enemyVision.HasPeripheralDetection))
                 {
                     anyOtherMouseSeesPlayer = true;
@@ -79,7 +119,7 @@ public class FlockingAttackDecisionTree
                 anyBlueMiceSeesPlayer = false;
                 if (!flockIsRotating && leaderMouse == null)
                 {
-                    leaderMouse = blueMouse;
+                    leaderMouse = currentMouse;
                 }
                 BroadcastRotation(true, lastKnownPlayerPosition);
             }
@@ -87,7 +127,7 @@ public class FlockingAttackDecisionTree
 
         if (flockIsRotating)
         {
-            if (leaderMouse == blueMouse)
+            if (leaderMouse == currentMouse)
             {
                 if (flockSearchTime > 0f)
                 {
@@ -96,7 +136,7 @@ public class FlockingAttackDecisionTree
                     if (flockSearchTime <= 0f)
                     {
                         BroadcastRotation(false);
-                        BroadcastPatrolTransition(blueMouse);
+                        BroadcastPatrolTransition(currentMouse);
                         leaderMouse = null;
                     }
                 }
@@ -111,11 +151,11 @@ public class FlockingAttackDecisionTree
                     BroadcastRotation(false, enemy.enemyVision.LastSeenPosition);
                     leaderMouse = null;
 
-                    if (blueMouse != null && enemy.PlayerTransform != null)
+                    if (currentMouse != null && enemy.PlayerTransform != null)
                     {
                         BlueMouse.BroadcastToAllMice(
                             StateEnum.FlockingAttackState,
-                            blueMouse,
+                            currentMouse,
                             enemy.PlayerTransform.position
                         );
                     }
@@ -134,91 +174,65 @@ public class FlockingAttackDecisionTree
         {
             if (leaderMouse == null)
             {
-                leaderMouse = blueMouse;
+                leaderMouse = currentMouse;
             }
             BroadcastRotation(true, lastKnownPlayerPosition);
         }
     }
 
-    private void BroadcastPatrolTransition(BlueMouse initiator)
-    {
-        fsm.Transition(StateEnum.FlockingPatrolState);
-        
-        foreach (var mouse in BlueMouse.GetAllBlueMice())
-        {
-            if (mouse != null && mouse != initiator)
-            {
-                mouse.TransitionToState(StateEnum.FlockingPatrolState);
-            }
-        }
-    }
-
-    private void BroadcastRotation(bool shouldRotate, Vector3? position = null)
-    {
-        if (flockIsRotating != shouldRotate)
-        {
-            flockIsRotating = shouldRotate;
-
-            if (shouldRotate)
-            {
-                flockSearchTime = rotationDuration;
-            }
-
-            if (position.HasValue)
-            {
-                lastKnownPlayerPosition = position;
-            }
-
-            BlueMouse blueMouse = enemy as BlueMouse;
-            if (blueMouse != null)
-            {
-                foreach (var mouse in BlueMouse.GetAllBlueMice())
-                {
-                    if (mouse != null && mouse != blueMouse)
-                    {
-                        State currentState = mouse.StateMachine.GetCurrentState();
-                        FlockingAttackState attackState = currentState as FlockingAttackState;
-
-                        if (attackState != null && attackState.GetDecisionTree() != null)
-                        {
-                            attackState.GetDecisionTree().SyncRotationState(shouldRotate, position);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public void SyncRotationState(bool shouldRotate, Vector3? position)
-    {
-        flockIsRotating = shouldRotate;
-
-        if (position.HasValue)
-        {
-            lastKnownPlayerPosition = position;
-        }
-    }
-
-    private void MoveToPositionWithFlocking(Vector3 targetPosition)
+    private void MoveToPositionWithFlocking(Vector3 targetPos)
     {
         if (mouseBoid == null) return;
-
-        Vector3 dirToTarget = (targetPosition - enemy.transform.position).normalized;
-        Vector3 seekForce = dirToTarget * attackSpeed;
+        
+        Vector3 dirToTarget = (targetPos - enemy.transform.position).normalized;
+        float distToTarget = Vector3.Distance(enemy.transform.position, targetPos);
+        
+        Vector3 moveForce = dirToTarget * attackSpeed;
         Vector3 avoidForce = enemy.obstacleAvoidance.Avoid() * 1.5f;
-        Vector3 combinedForce = seekForce + avoidForce;
-
+        Vector3 combinedForce = moveForce + avoidForce;
+        
         mouseBoid.SetPathFollowingForce(combinedForce);
         mouseBoid.ApplyFlocking();
         mouseBoid.UpdateMovement();
     }
 
+    private void BroadcastPatrolTransition(BlueMouse initiatorMouse)
+    {
+        foreach (var mouse in BlueMouse.GetAllBlueMice())
+        {
+            if (mouse != null && mouse != initiatorMouse)
+            {
+                mouse.TransitionToState(StateEnum.FlockingPatrolState);
+            }
+        }
+        
+        fsm.Transition(StateEnum.FlockingPatrolState);
+    }
+
+    private void BroadcastRotation(bool startRotation, Vector3? lastPosition = null)
+    {
+        flockIsRotating = startRotation;
+        
+        if (startRotation)
+        {
+            flockSearchTime = rotationDuration;
+        }
+        else
+        {
+            flockSearchTime = 0f;
+        }
+    }
+
     private void CreateTree()
     {
-        if (fsm == null || enemy == null)
-        {
-            return;
-        }
+        if (fsm == null || enemy == null) return;
+
+        ActionNode escapar = new ActionNode(() => {
+            if (playerController != null && playerController.isAttacking)
+            {
+                fsm.Transition(StateEnum.BlueEscapeState);
+            }
+        });
 
         ActionNode atacar = new ActionNode(() => {
             if (enemy.enemyVision.LastSeenPosition.HasValue)
@@ -242,7 +256,9 @@ public class FlockingAttackDecisionTree
         });
 
         QuestionNode estaGirando = new QuestionNode(atacar, patrullar, () => flockSearchTime > 0f);
-        rootNode = new QuestionNode(atacar, estaGirando, () => anyBlueMiceSeesPlayer || enemy.enemyVision.HasDirectDetection || enemy.enemyVision.HasPeripheralDetection);
+        QuestionNode jugadorVisible = new QuestionNode(atacar, estaGirando, () => anyBlueMiceSeesPlayer || enemy.enemyVision.HasDirectDetection);
+        
+        rootNode = new QuestionNode(escapar, jugadorVisible, () => playerController.isAttacking);
     }
 
     public void StopRotation()

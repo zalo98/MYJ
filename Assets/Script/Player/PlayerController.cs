@@ -11,12 +11,13 @@ public class PlayerController : MonoBehaviour, ITarget
     private PlayerRunState runState;
     private PlayerInvisibleState invisibleState;
     
-    public bool isAttacking = false;
-    
     [SerializeField] private float walkSpeed = 3f;
     [SerializeField] private float runSpeed = 6f;
     [SerializeField] private float rotationSpeed = 10f;
     [SerializeField] private float groundDrag = 5f;
+    public bool isAttacking = false;
+    [SerializeField] private float attackDuration = 10f;
+    private float attackTimer = 0f;
 
     private Vector3 moveDirection;
     private bool spacePressedThisFrame = false;
@@ -85,9 +86,10 @@ public class PlayerController : MonoBehaviour, ITarget
 
     private void Update()
     {
+        attackTimer -= Time.deltaTime;
         spacePressedThisFrame = false;
-        
         fsm.Update();
+        UpdateAttackTimer();
         
         if (Input.GetKeyDown(KeyCode.Space) && fsm.GetCurrentState() != invisibleState && !spacePressedThisFrame)
         {
@@ -104,6 +106,24 @@ public class PlayerController : MonoBehaviour, ITarget
     private void FixedUpdate()
     {
         ApplyMovement();
+    }
+
+    private void UpdateAttackTimer()
+    {
+        if (attackTimer <= 0f)
+        {
+            isAttacking = false;
+        }
+        else
+        {
+            isAttacking = true;
+        }
+    }
+    
+    public void ResetAttackTimer()
+    {
+        attackTimer = attackDuration;
+        isAttacking = true;
     }
 
     private void ApplyMovement()

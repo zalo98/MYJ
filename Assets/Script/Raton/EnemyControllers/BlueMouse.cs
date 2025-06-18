@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlueMouse : EnemyController
+public class BlueMouse : EnemyController, IInteractable
 {
     private static List<BlueMouse> allBlueMice = new List<BlueMouse>();
 
@@ -10,6 +10,7 @@ public class BlueMouse : EnemyController
     [HideInInspector] public State BlueEscapeState;
 
     private MouseBoid mouseBoid;
+    private bool isEscaping = false;
 
     private void OnEnable()
     {
@@ -46,6 +47,7 @@ public class BlueMouse : EnemyController
         BlueEscapeState = new BlueEscapeState(this, StateMachine);
 
         FlockingPatrolState.AddTransition(StateEnum.FlockingAttackState, FlockingAttackState);
+        FlockingPatrolState.AddTransition(StateEnum.BlueEscapeState, BlueEscapeState);
         
         FlockingAttackState.AddTransition(StateEnum.FlockingPatrolState, FlockingPatrolState);
         FlockingAttackState.AddTransition(StateEnum.BlueEscapeState, BlueEscapeState);
@@ -85,4 +87,23 @@ public class BlueMouse : EnemyController
     {
         return allBlueMice;
     }
+
+    public void ChangeEscapeBool()
+    {
+        isEscaping = !isEscaping;
+    }
+    
+    public void Interact()
+    {
+        Die();
+    }
+
+    private void Die()
+    {
+        if (isEscaping == true)
+        {
+            Destroy(gameObject);
+        }
+    }
 }
+

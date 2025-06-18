@@ -9,6 +9,7 @@ public class FlockingAttackState : State
     private FlockingAttackDecisionTree attackDecisionTree;
     private MouseBoid mouseBoid;
     private FlockingManager flockingManager;
+    private PlayerController playerController;
 
     public FlockingAttackState(EnemyController controller, FSM fsm) : base(fsm)
     {
@@ -20,6 +21,7 @@ public class FlockingAttackState : State
     {
         enemyVision = enemyController.GetComponent<EnemyVision>();
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        playerController = playerTransform.GetComponent<PlayerController>();
         flockingManager = FlockingManager.Instance;
         
         mouseBoid = enemyController.GetComponent<MouseBoid>();
@@ -38,19 +40,6 @@ public class FlockingAttackState : State
         if (playerTransform == null)
         {
             return;
-        }
-
-        if (enemyVision.HasDirectDetection)
-        {
-            BlueMouse blueMouse = enemyController as BlueMouse;
-            if (blueMouse != null)
-            {
-                BlueMouse.BroadcastToAllMice(
-                    StateEnum.FlockingAttackState,
-                    blueMouse,
-                    playerTransform.position
-                );
-            }
         }
 
         attackDecisionTree.Execute();

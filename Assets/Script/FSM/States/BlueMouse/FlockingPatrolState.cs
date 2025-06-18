@@ -6,6 +6,7 @@ public class FlockingPatrolState : State
     private MouseBoid mouseBoid;
     private FlockingManager flockingManager;
     private float obstacleAvoidanceWeight = 1.5f;
+    private PlayerController playerController;
 
     public FlockingPatrolState(EnemyController controller, FSM fsm) : base(fsm)
     {
@@ -29,6 +30,11 @@ public class FlockingPatrolState : State
         {
             flockingManager.AddBoid(mouseBoid);
         }
+        
+        if (playerController == null && controller.PlayerTransform != null)
+        {
+            playerController = controller.PlayerTransform.GetComponent<PlayerController>();
+        }
     }
 
     public override void Execute()
@@ -38,15 +44,26 @@ public class FlockingPatrolState : State
             BlueMouse blueMouse = controller as BlueMouse;
             if (blueMouse != null)
             {
-                BlueMouse.BroadcastToAllMice(
-                    StateEnum.FlockingAttackState,
-                    blueMouse,
-                    controller.PlayerTransform.position
-                );
+                if (playerController != null && playerController.isAttacking)
+                {
+                    BlueMouse.BroadcastToAllMice(
+                        StateEnum.BlueEscapeState,
+                        blueMouse,
+                        controller.PlayerTransform.position
+                    );
+                    fsm.Transition(StateEnum.BlueEscapeState);
+                }
+                else
+                {
+                    BlueMouse.BroadcastToAllMice(
+                        StateEnum.FlockingAttackState,
+                        blueMouse,
+                        controller.PlayerTransform.position
+                    );
+                    fsm.Transition(StateEnum.FlockingAttackState);
+                }
+                return;
             }
-
-            fsm.Transition(StateEnum.FlockingAttackState);
-            return;
         }
 
         if (flockingManager == null)
@@ -75,3 +92,4 @@ public class FlockingPatrolState : State
         controller.EnemyAnimator.SetBool("IsWalking", false);
     }
 }
+
