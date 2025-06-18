@@ -20,7 +20,6 @@ public class PlayerInvisibleState : State
 
     public override void Awake()
     {
-        Debug.Log("Entrando en estado Invisible");
         animController.PlayInvisibleAnimation();
         isDetectable = false;
         
@@ -71,10 +70,8 @@ public class PlayerInvisibleState : State
 
     public override void Execute()
     {
-        // Actualizar el timer
         currentInvisibleTime -= Time.deltaTime;
         
-        // Si el timer llega a 0, cambiar a IdleState
         if (currentInvisibleTime <= 0)
         {
             fsm.Transition(StateEnum.PlayerIdle);
@@ -131,7 +128,6 @@ public class PlayerInvisibleState : State
 
     public override void Sleep()
     {
-        Debug.Log("Saliendo del estado Invisible");
         isDetectable = true;
         
         foreach (Renderer renderer in playerController.playerRenderers)

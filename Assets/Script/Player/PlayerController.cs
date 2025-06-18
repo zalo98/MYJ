@@ -11,10 +11,11 @@ public class PlayerController : MonoBehaviour, ITarget
     private PlayerRunState runState;
     private PlayerInvisibleState invisibleState;
     
+    public bool isAttacking = false;
+    
     [SerializeField] private float walkSpeed = 3f;
     [SerializeField] private float runSpeed = 6f;
     [SerializeField] private float rotationSpeed = 10f;
-    
     [SerializeField] private float groundDrag = 5f;
 
     private Vector3 moveDirection;

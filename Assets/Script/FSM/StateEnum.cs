@@ -1,16 +1,20 @@
 public enum StateEnum
 {
-    //EnemyStates
+    //RedMouseStates
     EnemyPatrol,
     EnemyAlert,
     Attack,
     EnemyEscape,
     EnemySeek,
     EnemyLookingState,
-    //MouseStates
+    //GreenMouseStates
     MousePatrolState,
     MouseLookingState,
     MouseEscapeState,
+    //BlueMouseStates
+    FlockingPatrolState,
+    FlockingAttackState,
+    BlueEscapeState,
     //PlayerStates
     PlayerInvisible,
     PlayerIdle,

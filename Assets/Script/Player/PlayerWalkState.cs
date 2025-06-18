@@ -13,7 +13,6 @@ public class PlayerWalkState : State
 
     public override void Awake()
     {
-        Debug.Log("Entrando en estado Walk");
         animController.PlayWalkAnimation();
     }
 
@@ -75,6 +74,6 @@ public class PlayerWalkState : State
 
     public override void Sleep()
     {
-        Debug.Log("Saliendo del estado Walk");
+        
     }
 }

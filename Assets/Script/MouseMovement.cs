@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class MouseMovement : MonoBehaviour
 {
-    [Header("Configuración de Ruta Fija")]
+    [Header("Configuraciï¿½n de Ruta Fija")]
     public Transform startPoint; // Punto A
     public Transform endPoint;   // Punto B
     public Transform[] waypoints; // Puntos intermedios (como antes)
 
-    [Header("Configuración de Navegación")]
+    [Header("Configuraciï¿½n de Navegaciï¿½n")]
     public float arrivalRadius = 0.5f;
     public LayerMask obstacleMask = -1; // Solo para pathfinding de escape
     public float anticipationDistance = 1.0f; // Distancia para anticipar llegada a endpoints
 
-    [Header("Configuración de Escape")]
-    public float recalculateInterval = 0.5f; // Recálculo de escape más frecuente
+    [Header("Configuraciï¿½n de Escape")]
+    public float recalculateInterval = 0.5f; // Recï¿½lculo de escape mï¿½s frecuente
 
     // Referencias del sistema (solo para escape)
     private PFManager pathfindingManager;
@@ -23,7 +23,7 @@ public class MouseMovement : MonoBehaviour
 
     // Sistema de waypoints fijos (patrullaje normal)
     private int currentWaypointIndex = 0;
-    private int waypointDirection = 1; // 1 adelante, -1 atrás
+    private int waypointDirection = 1; // 1 adelante, -1 atrï¿½s
     private bool reachedEndPoint = false;
 
     // Sistema de escape con A*
@@ -31,7 +31,7 @@ public class MouseMovement : MonoBehaviour
     private int escapePathIndex = 0;
     private bool isEscaping = false;
 
-    // Control de recálculo de escape
+    // Control de recï¿½lculo de escape
     private float lastRecalculateTime;
     private Vector3 lastPlayerPosition;
 
@@ -46,22 +46,17 @@ public class MouseMovement : MonoBehaviour
         pathfindingManager = PFManager.Instance;
         nodeGrid = FindObjectOfType<PFNodeGrid>();
 
-        // No es crítico si no las encuentra (solo afecta al escape)
+        // No es crÃ­tico si no las encuentra (solo afecta al escape)
         if (pathfindingManager == null)
-            Debug.LogWarning("No se encontró PFManager - el escape no funcionará");
+            Debug.LogWarning("No se encontrÃ³ PFManager - el escape no funcionarÃ¡");
 
         if (nodeGrid == null)
-            Debug.LogWarning("No se encontró PFNodeGrid - el escape no funcionará");
+            Debug.LogWarning("No se encontrÃ³ PFNodeGrid - el escape no funcionarÃ¡");
 
         // Verificar waypoints
         if (startPoint == null || endPoint == null)
             Debug.LogError("Puntos de inicio y final no asignados en MouseMovement");
-
-        // Posicionar al enemigo en el punto inicial
-        if (startPoint != null)
-            transform.position = startPoint.position;
-
-        // Inicializar sistema de waypoints
+        
         currentWaypointIndex = 0;
         waypointDirection = 1;
         reachedEndPoint = false;
@@ -69,7 +64,7 @@ public class MouseMovement : MonoBehaviour
         Debug.Log("MouseMovement inicializado - Modo waypoints para patrullaje, A* para escape");
     }
 
-    // Obtener la posición del objetivo actual
+    // Obtener la posiciï¿½n del objetivo actual
     public Vector3 GetCurrentTargetPosition()
     {
         if (isEscaping)
@@ -96,7 +91,7 @@ public class MouseMovement : MonoBehaviour
         }
     }
 
-    // Obtener posición del waypoint actual (sistema fijo)
+    // Obtener posiciï¿½n del waypoint actual (sistema fijo)
     Vector3 GetCurrentWaypointPosition()
     {
         if (!reachedEndPoint) // Ida (A ? B)
@@ -131,7 +126,7 @@ public class MouseMovement : MonoBehaviour
         Vector3 target = GetCurrentTargetPosition();
         float distance = Vector3.Distance(position, target);
 
-        // Usar un radio más pequeño para endpoints para transiciones más rápidas
+        // Usar un radio mï¿½s pequeï¿½o para endpoints para transiciones mï¿½s rï¿½pidas
         float effectiveRadius = arrivalRadius;
 
         if (!isEscaping) // Solo en patrullaje
@@ -139,14 +134,14 @@ public class MouseMovement : MonoBehaviour
             if ((!reachedEndPoint && target == endPoint.position) ||
                 (reachedEndPoint && target == startPoint.position))
             {
-                effectiveRadius = arrivalRadius * 0.7f; // 30% más pequeño para endpoints
+                effectiveRadius = arrivalRadius * 0.7f; // 30% mï¿½s pequeï¿½o para endpoints
             }
         }
 
         return distance <= effectiveRadius;
     }
 
-    // Método adicional para anticipar llegada a endpoints
+    // Mï¿½todo adicional para anticipar llegada a endpoints
     public bool ShouldPrepareForTurn(Vector3 position, Vector3 velocity)
     {
         if (isEscaping) return false; // Solo para patrullaje
@@ -176,10 +171,10 @@ public class MouseMovement : MonoBehaviour
             // MODO ESCAPE: Avanzar en el path A*
             escapePathIndex++;
 
-            // Si llegó al final de la ruta de escape
+            // Si llegï¿½ al final de la ruta de escape
             if (escapePathIndex >= escapePath.Count)
             {
-                // Verificar si está cerca del punto inicial
+                // Verificar si estï¿½ cerca del punto inicial
                 if (Vector3.Distance(transform.position, startPoint.position) <= arrivalRadius)
                 {
                     CompleteEscape();
@@ -201,41 +196,41 @@ public class MouseMovement : MonoBehaviour
         if (!reachedEndPoint) // Modo ida (A ? B)
         {
             currentWaypointIndex++;
-            Debug.Log($"Modo IDA - Nuevo índice: {currentWaypointIndex}");
+            Debug.Log($"Modo IDA - Nuevo ï¿½ndice: {currentWaypointIndex}");
 
-            // Si acabamos de pasar el último waypoint, ahora va hacia endPoint
+            // Si acabamos de pasar el ï¿½ltimo waypoint, ahora va hacia endPoint
             if (currentWaypointIndex > waypoints.Length)
             {
-                // Llegó al endPoint, cambiar a modo vuelta
+                // Llegï¿½ al endPoint, cambiar a modo vuelta
                 reachedEndPoint = true;
-                currentWaypointIndex = waypoints.Length - 1; // Empezar desde el último waypoint
+                currentWaypointIndex = waypoints.Length - 1; // Empezar desde el ï¿½ltimo waypoint
                 waypointDirection = -1;
-                Debug.Log("?? Llegó al punto B, iniciando regreso - índice: " + currentWaypointIndex);
+                Debug.Log("?? Llegï¿½ al punto B, iniciando regreso - ï¿½ndice: " + currentWaypointIndex);
             }
         }
         else // Modo vuelta (B ? A)
         {
             currentWaypointIndex--;
-            Debug.Log($"Modo VUELTA - Nuevo índice: {currentWaypointIndex}");
+            Debug.Log($"Modo VUELTA - Nuevo ï¿½ndice: {currentWaypointIndex}");
 
-            // Si ya pasó el primer waypoint, ahora va hacia startPoint
+            // Si ya pasï¿½ el primer waypoint, ahora va hacia startPoint
             if (currentWaypointIndex < -1)
             {
-                // Llegó al startPoint, cambiar a modo ida
+                // Llegï¿½ al startPoint, cambiar a modo ida
                 reachedEndPoint = false;
                 currentWaypointIndex = 0; // Empezar desde el primer waypoint
                 waypointDirection = 1;
-                Debug.Log("?? Llegó al punto A, iniciando nueva ida - índice: " + currentWaypointIndex);
+                Debug.Log("?? Llegï¿½ al punto A, iniciando nueva ida - ï¿½ndice: " + currentWaypointIndex);
             }
         }
 
-        Debug.Log($"Próximo objetivo: {GetCurrentWaypointPosition()}");
+        Debug.Log($"Prï¿½ximo objetivo: {GetCurrentWaypointPosition()}");
     }
 
     // Iniciar escape con A* pathfinding
     public void StartEscape()
     {
-        if (isEscaping) return; // Ya está escapando
+        if (isEscaping) return; // Ya estï¿½ escapando
 
         Debug.Log("Iniciando escape con A* pathfinding");
         isEscaping = true;
@@ -270,7 +265,7 @@ public class MouseMovement : MonoBehaviour
 
                 if (escapePath == null || escapePath.Count == 0)
                 {
-                    Debug.LogWarning("A* no pudo encontrar path válido, usando escape directo");
+                    Debug.LogWarning("A* no pudo encontrar path vï¿½lido, usando escape directo");
                     CreateDirectEscapePath();
                 }
                 else
@@ -290,14 +285,14 @@ public class MouseMovement : MonoBehaviour
                 RestoreTemporaryBlockedNodes(temporaryBlockedNodes);
             }
 
-            // Guardar posición del player para detectar cambios
+            // Guardar posiciï¿½n del player para detectar cambios
             Transform player = GetPlayerTransform();
             if (player != null)
                 lastPlayerPosition = player.position;
         }
         else
         {
-            Debug.LogWarning("No se pudieron encontrar nodos válidos para A*, usando escape directo");
+            Debug.LogWarning("No se pudieron encontrar nodos vï¿½lidos para A*, usando escape directo");
             CreateDirectEscapePath();
         }
     }
@@ -306,10 +301,10 @@ public class MouseMovement : MonoBehaviour
     void CreateDirectEscapePath()
     {
         // Crear un path simple directo al punto inicial
-        // El ObstacleAvoidance en EnemySteering se encargará de evitar paredes
+        // El ObstacleAvoidance en EnemySteering se encargarï¿½ de evitar paredes
         escapePath = null; // Indicar que no hay path A*
         escapePathIndex = 0;
-        Debug.Log("Usando escape directo al punto inicial - ObstacleAvoidance manejará las paredes");
+        Debug.Log("Usando escape directo al punto inicial - ObstacleAvoidance manejarï¿½ las paredes");
     }
 
     // Completar escape y volver al patrullaje
@@ -349,16 +344,16 @@ public class MouseMovement : MonoBehaviour
         {
             float playerMovementDistance = Vector3.Distance(player.position, lastPlayerPosition);
 
-            // Si el player se movió más de 2 unidades, recalcular escape
+            // Si el player se moviï¿½ mï¿½s de 2 unidades, recalcular escape
             if (playerMovementDistance > 2f)
             {
-                Debug.Log("Player se movió durante escape, recalculando path");
+                Debug.Log("Player se moviï¿½ durante escape, recalculando path");
                 CalculateEscapePath();
             }
         }
     }
 
-    // Obtener el nodo más cercano a una posición
+    // Obtener el nodo mï¿½s cercano a una posiciï¿½n
     PFNodes GetClosestNode(Vector3 worldPosition)
     {
         if (nodeGrid == null || nodeGrid.nodeGrid == null) return null;
@@ -387,7 +382,7 @@ public class MouseMovement : MonoBehaviour
 
             if (distanceToPlayer <= playerAvoidanceRadius)
             {
-                // Usar reflexión para acceder al campo privado 'blocked'
+                // Usar reflexiï¿½n para acceder al campo privado 'blocked'
                 var blockedField = typeof(PFNodes).GetField("blocked",
                     System.Reflection.BindingFlags.NonPublic |
                     System.Reflection.BindingFlags.Instance);
@@ -423,17 +418,17 @@ public class MouseMovement : MonoBehaviour
     // Obtener referencia al player
     Transform GetPlayerTransform()
     {
-        // Método 1: Si tienes una referencia directa
+        // Mï¿½todo 1: Si tienes una referencia directa
         var enemyController = GetComponent<EnemyController>();
         if (enemyController != null && enemyController.PlayerTransform != null)
             return enemyController.PlayerTransform;
 
-        // Método 2: Buscar por tag
+        // Mï¿½todo 2: Buscar por tag
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         return player != null ? player.transform : null;
     }
 
-    // Métodos de compatibilidad para escape
+    // Mï¿½todos de compatibilidad para escape
     public bool HasReachedEscapeTarget(Vector3 position)
     {
         if (!isEscaping || escapePath == null || escapePathIndex >= escapePath.Count)
@@ -452,7 +447,7 @@ public class MouseMovement : MonoBehaviour
                Vector3.Distance(transform.position, startPoint.position) <= arrivalRadius;
     }
 
-    // Para visualización en el editor
+    // Para visualizaciï¿½n en el editor
     void OnDrawGizmosSelected()
     {
         // Dibujar puntos de inicio y fin

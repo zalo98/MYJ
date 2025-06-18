@@ -13,7 +13,6 @@ public class PlayerIdleState : State
 
     public override void Awake()
     {
-        Debug.Log("Entrando en estado Idle");
         animController.PlayIdleAnimation();
         
         playerController.SetMoveDirection(Vector3.zero);
@@ -44,6 +43,6 @@ public class PlayerIdleState : State
 
     public override void Sleep()
     {
-        Debug.Log("Saliendo del estado Idle");
+        
     }
 }

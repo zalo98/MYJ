@@ -42,9 +42,6 @@ public class EnemySteering : MonoBehaviour
         if (obstacleAvoidance == null)
             obstacleAvoidance = gameObject.AddComponent<ObstacleAvoidance>();
 
-        if (mouseMovement == null)
-            Debug.LogError("No se encontró componente MouseMovement");
-
         GameObject targetObj = new GameObject("TargetPoint");
         targetTransform = targetObj.transform;
         targetTransform.parent = transform;
@@ -80,62 +77,47 @@ public class EnemySteering : MonoBehaviour
 
     public void FollowPath()
     {
-        // Actualizar detección de enemigos
         if (enemyVision != null)
             enemyVision.UpdateDetection();
 
-        // PRIMERO: Verificar si detecta al player antes de cualquier movimiento
         if (!escaping && IsPlayerDetected())
         {
             Debug.Log("♟️ Player detectado! Iniciando escape táctico hacia punto A");
             StartEscapeMode();
         }
 
-        // Actualizar el path si es necesario
         mouseMovement.UpdatePath();
 
         if (escaping)
         {
-            // MODO ESCAPE TÁCTICO - Usando pathfinding que evita player pero va hacia A
             Vector3 target = mouseMovement.GetCurrentTargetPosition();
             currentTargetPosition = target;
             currentMaxSpeed = controller.runSpeed;
-
-            // 1. Dirección principal hacia el nodo táctico calculado
+            
             Vector3 dirToTarget = (target - transform.position).normalized * controller.runSpeed;
-
-            // 2. Evasión de obstáculos físicos (paredes, etc)
+            
             Vector3 obstacleAvoidForce = obstacleAvoidance.Avoid();
-
-            // 3. NO usar AvoidPlayer aquí - el pathfinding táctico ya evita al player
-            // El flee está "integrado" en la selección de nodos del pathfinding
-
-            // 4. Combinar fuerzas - priorizar el pathfinding táctico
+            
             Vector3 combinedForce;
 
             if (obstacleAvoidForce.magnitude > 0.1f)
             {
-                // Si hay obstáculo físico inmediato, evitarlo pero mantener dirección general
                 combinedForce = (dirToTarget * 1.8f) + (obstacleAvoidForce * 2.2f);
             }
             else
             {
-                // Camino libre - seguir el pathfinding táctico puro
                 combinedForce = dirToTarget * 2f;
             }
 
             ApplySteering(combinedForce, controller.runSpeed);
-
-            // Debug visual del pathfinding táctico
+            
             Debug.DrawRay(transform.position, dirToTarget.normalized * 3f, Color.cyan, 0.1f);
             Debug.DrawRay(transform.position, obstacleAvoidForce.normalized * 2f, Color.red, 0.1f);
-
-            // Verificar progreso del escape táctico
+            
             if (mouseMovement.HasReachedCurrentTarget(transform.position))
             {
                 mouseMovement.MoveToNextTarget();
-
-                // Si llegó al punto A, verificar si terminar escape
+                
                 if (Vector3.Distance(transform.position, mouseMovement.startPoint.position) <= mouseMovement.arrivalRadius)
                 {
                     if (!IsPlayerDetected() || IsInSafeZone())
@@ -144,13 +126,11 @@ public class EnemySteering : MonoBehaviour
                     }
                     else
                     {
-                        // Quedarse en punto A hasta que sea seguro
                         Debug.Log("🏠 En punto A pero player aún visible - esperando...");
                     }
                 }
             }
-
-            // Verificar si el player se fue y está en zona segura
+            
             if (!IsPlayerDetected() && IsInSafeZone())
             {
                 Debug.Log("✅ Player ya no detectado y en zona segura - terminando escape");
@@ -159,7 +139,6 @@ public class EnemySteering : MonoBehaviour
         }
         else
         {
-            // MODO PATRULLAJE NORMAL (sin cambios)
             Vector3 target = mouseMovement.GetCurrentTargetPosition();
             currentTargetPosition = target;
             currentMaxSpeed = controller.walkSpeed;
@@ -185,7 +164,7 @@ public class EnemySteering : MonoBehaviour
 
     bool IsInSafeZone()
     {
-        float safeDistance = 4f; // Zona segura alrededor del punto A
+        float safeDistance = 4f;
         return Vector3.Distance(transform.position, mouseMovement.startPoint.position) <= safeDistance;
     }
 
@@ -195,8 +174,7 @@ public class EnemySteering : MonoBehaviour
         mouseMovement.ResetToStart();
 
         Debug.Log("🏠 Escape completado - resumiendo patrullaje normal");
-
-        // Opcional: Cambiar animación
+        
         var animController = GetComponent<EnemyAnimationController>();
         if (animController != null)
             animController.SetRunning(false);
@@ -204,14 +182,13 @@ public class EnemySteering : MonoBehaviour
 
     public void StartEscapeMode()
     {
-        if (escaping) return; // Ya está escapando
+        if (escaping) return;
 
         escaping = true;
         mouseMovement.StartEscape();
 
         Debug.Log("🏃‍♂️ ESCAPE TÁCTICO INICIADO - Dirigiéndose al punto A");
-
-        // Opcional: Cambiar animación
+        
         var animController = GetComponent<EnemyAnimationController>();
         if (animController != null)
             animController.SetRunning(true);
@@ -219,13 +196,10 @@ public class EnemySteering : MonoBehaviour
 
     private void ApplySteering(Vector3 force, float maxSpeed)
     {
-        // Limitar la fuerza máxima
         force = Vector3.ClampMagnitude(force, maxSteeringForce);
-
-        // Aplicar fuerza
+        
         rb.AddForce(force, ForceMode.Acceleration);
-
-        // Limitar velocidad máxima
+        
         if (rb.linearVelocity.magnitude > maxSpeed)
         {
             rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
@@ -239,8 +213,7 @@ public class EnemySteering : MonoBehaviour
             escaping = true;
             mouseMovement.StartEscape();
         }
-
-        // El resto de la lógica ya está en FollowPath()
+        
         FollowPath();
     }
 

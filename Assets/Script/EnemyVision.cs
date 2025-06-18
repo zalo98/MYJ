@@ -94,6 +94,11 @@ public class EnemyVision : MonoBehaviour
         Vector3 direction = target.position - transform.position;
         return !Physics.Raycast(transform.position, direction.normalized, direction.magnitude, obstacleMask);
     }
+    
+    public void ForceLastSeenPosition(Vector3 position)
+    {
+        lastSeenPosition = position;
+    }
 
     private void OnDrawGizmos()
     {

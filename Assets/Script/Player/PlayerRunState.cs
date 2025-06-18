@@ -13,7 +13,6 @@ public class PlayerRunState : State
 
     public override void Awake()
     {
-        Debug.Log("Entrando en estado Run");
         animController.PlayRunAnimation();
     }
 
@@ -75,6 +74,6 @@ public class PlayerRunState : State
 
     public override void Sleep()
     {
-        Debug.Log("Saliendo del estado Run");
+        
     }
 }
