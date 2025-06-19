@@ -5,10 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0b663789-7577-479c-8c1e-c5ea8b6cf52d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Enemies/BlueMouse/BlueMouse.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Enemies/BlueMouse/BlueMouse.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/PruebaGonza.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/PruebaGonza.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Script/FSM/States/BlueMouse/FlockingPatrolState.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/FSM/States/BlueMouse/FlockingPatrolState.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Script/MouseMovement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/MouseMovement.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Script/EnemyVision.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Script/EnemyVision.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,6 +103,7 @@
       <workItem from="1750282257166" duration="4280000" />
       <workItem from="1750288375453" duration="1113000" />
       <workItem from="1750294330330" duration="7035000" />
+      <workItem from="1750302894249" duration="288000" />
     </task>
     <servers />
   </component>

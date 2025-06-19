@@ -9,6 +9,7 @@ public class EnemyVision : MonoBehaviour
     [SerializeField] private float directFov = 50f;
     [SerializeField] private float peripheralRange = 7f;
     [SerializeField] private float peripheralFov = 120f;
+    [SerializeField] private float closeProximityRange = 2f;
 
     [Header("Layer Masks")]
     [SerializeField] private LayerMask targetMask;
@@ -31,6 +32,7 @@ public class EnemyVision : MonoBehaviour
         peripheralDetected.Clear();
         lastSeenPosition = null;
 
+        FindCloseProximityTargets();
         FindDirectTargets();
         if (usePeripheralVision)
             FindPeripheralTargets();
@@ -40,6 +42,26 @@ public class EnemyVision : MonoBehaviour
     {
         return directDetected.Exists(t => t.GetTransform == target) ||
                peripheralDetected.Exists(t => t.GetTransform == target);
+    }
+
+    private void FindCloseProximityTargets()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, closeProximityRange, targetMask);
+
+        foreach (var hitCollider in hitColliders)
+        {
+            ITarget target = hitCollider.GetComponent<ITarget>();
+            if (target != null && CheckView(target.GetTransform))
+            {
+                if (target is PlayerController player && !player.IsDetectable())
+                {
+                    continue;
+                }
+
+                directDetected.Add(target);
+                lastSeenPosition = target.GetTransform.position;
+            }
+        }
     }
 
     private void FindDirectTargets()
@@ -94,7 +116,7 @@ public class EnemyVision : MonoBehaviour
         Vector3 direction = target.position - transform.position;
         return !Physics.Raycast(transform.position, direction.normalized, direction.magnitude, obstacleMask);
     }
-    
+
     public void ForceLastSeenPosition(Vector3 position)
     {
         lastSeenPosition = position;
@@ -102,17 +124,17 @@ public class EnemyVision : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireSphere(transform.position, closeProximityRange);
+
         Gizmos.color = Color.green;
-        
         Gizmos.DrawWireSphere(transform.position, directRange);
-        
         DrawFovGizmo(transform.position, transform.forward, directFov, directRange);
 
         if (usePeripheralVision)
         {
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(transform.position, peripheralRange);
-            
             DrawFovGizmo(transform.position, transform.forward, peripheralFov, peripheralRange);
         }
     }
