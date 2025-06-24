@@ -176,28 +176,6 @@ public class MouseMovement : MonoBehaviour
         return distance <= effectiveRadius;
     }
 
-    // Método adicional para anticipar llegada a endpoints
-    public bool ShouldPrepareForTurn(Vector3 position, Vector3 velocity)
-    {
-        if (isEscaping) return false; // Solo para patrullaje
-
-        Vector3 target = GetCurrentTargetPosition();
-
-        // Solo anticipar en endpoints
-        bool isAtEndpoint = (!reachedEndPoint && target == endPoint.position) ||
-                           (reachedEndPoint && target == startPoint.position);
-
-        if (!isAtEndpoint) return false;
-
-        float distanceToTarget = Vector3.Distance(position, target);
-        float currentSpeed = velocity.magnitude;
-
-        // Anticipar basado en velocidad actual
-        float anticipationDist = Mathf.Clamp(currentSpeed * 0.5f, anticipationDistance * 0.5f, anticipationDistance);
-
-        return distanceToTarget <= anticipationDist;
-    }
-
     // Avanzar al siguiente punto en la ruta
     public void MoveToNextTarget()
     {
@@ -403,7 +381,7 @@ public class MouseMovement : MonoBehaviour
         if (currentNode != null && startNode != null)
         {
             // Marcar temporalmente nodos cerca del player como bloqueados
-            List<PFNodes> temporaryBlockedNodes = BlockNodesNearPlayer();
+            //List<PFNodes> temporaryBlockedNodes = BlockNodesNearPlayer();
 
             try
             {
@@ -666,7 +644,7 @@ public class MouseMovement : MonoBehaviour
             }
         }
 
-        // Dibujar línea al portal objetivo
+        // Dibujar linea al portal objetivo
         if (isEscaping && escapingToPortal && targetPortal != null)
         {
             Gizmos.color = Color.magenta;
