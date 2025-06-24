@@ -87,7 +87,6 @@ public class EnemySteering : MonoBehaviour
         // PRIMERO: Verificar si detecta al player antes de cualquier movimiento
         if (!escaping && IsPlayerDetected())
         {
-            Debug.Log("♟️ Player detectado! Iniciando escape táctico hacia punto A");
             StartEscapeMode();
         }
 
@@ -142,18 +141,12 @@ public class EnemySteering : MonoBehaviour
                     {
                         CompleteEscape();
                     }
-                    else
-                    {
-                        // Quedarse en punto A hasta que sea seguro
-                        Debug.Log("🏠 En punto A pero player aún visible - esperando...");
-                    }
                 }
             }
 
-            // Verificar si el player se fue y está en zona segura
+            // Verificar si el player se fue y esta en zona segura
             if (!IsPlayerDetected() && IsInSafeZone())
             {
-                Debug.Log("✅ Player ya no detectado y en zona segura - terminando escape");
                 CompleteEscape();
             }
         }
@@ -194,8 +187,6 @@ public class EnemySteering : MonoBehaviour
         escaping = false;
         mouseMovement.ResetToStart();
 
-        Debug.Log("🏠 Escape completado - resumiendo patrullaje normal");
-
         // Opcional: Cambiar animación
         var animController = GetComponent<EnemyAnimationController>();
         if (animController != null)
@@ -208,8 +199,6 @@ public class EnemySteering : MonoBehaviour
 
         escaping = true;
         mouseMovement.StartEscape();
-
-        Debug.Log("🏃‍♂️ ESCAPE TÁCTICO INICIADO - Dirigiéndose al punto A");
 
         // Opcional: Cambiar animación
         var animController = GetComponent<EnemyAnimationController>();

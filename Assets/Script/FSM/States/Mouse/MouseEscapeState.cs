@@ -18,8 +18,6 @@ public class MouseEscapeState : State
         escapeTimer = 0f;
         escapeInitiated = false;
 
-        Debug.Log("🚨 MouseEscapeState activado - iniciando escape táctico");
-
         // Activar el escape táctico en EnemySteering
         if (controller.steering != null)
         {
@@ -50,7 +48,6 @@ public class MouseEscapeState : State
 
             if (escapeTimer >= escapeTimeout || reachedSafeZone)
             {
-                Debug.Log("✅ Escape completado - volviendo a patrullaje");
                 controller.StateMachine.Transition(StateEnum.MousePatrolState);
                 return;
             }
@@ -70,8 +67,6 @@ public class MouseEscapeState : State
         {
             controller.steering.CompleteEscape(); // Necesitarás hacer este método público
         }
-
-        Debug.Log("😴 MouseEscapeState desactivado");
     }
 
     // Verificar si está en zona segura (cerca del punto A)

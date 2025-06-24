@@ -17,6 +17,11 @@ public class MouseMovement : MonoBehaviour
     [Header("Configuración de Escape")]
     public float recalculateInterval = 0.5f; // Recálculo de escape más frecuente
 
+    [Header("Portal Escape System")]
+    public bool usePortalEscape = true;
+    private Portal targetPortal;
+    private bool escapingToPortal = false;
+
     // Referencias del sistema (solo para escape)
     private PFManager pathfindingManager;
     private PFNodeGrid nodeGrid;
@@ -74,25 +79,50 @@ public class MouseMovement : MonoBehaviour
     {
         if (isEscaping)
         {
-            // MODO ESCAPE: Usar A* pathfinding o escape directo
-            if (escapePath != null && escapePath.Count > 0)
+            if (escapingToPortal && targetPortal != null)
             {
-                // Usando A* pathfinding
-                if (escapePathIndex < escapePath.Count)
-                    return escapePath[escapePathIndex].transform.position;
+                // MODO ESCAPE A PORTAL
+                if (escapePath != null && escapePath.Count > 0)
+                {
+                    // Usando A* hacia portal
+                    if (escapePathIndex < escapePath.Count)
+                    {
+                        Vector3 target = escapePath[escapePathIndex].transform.position;
+                        return target;
+                    }
+                    else
+                    {
+                        // Llegó al final del path, ir directo al portal
+                        return targetPortal.transform.position;
+                    }
+                }
                 else
-                    return startPoint.position; // Fallback al punto inicial
+                {
+                    // Ir directo al portal sin A*
+                    return targetPortal.transform.position;
+                }
             }
             else
             {
-                // Escape directo cuando A* falla - ir directo al inicio
-                return startPoint.position;
+                // Sistema de escape anterior (fallback)
+                if (escapePath != null && escapePath.Count > 0)
+                {
+                    if (escapePathIndex < escapePath.Count)
+                        return escapePath[escapePathIndex].transform.position;
+                    else
+                        return startPoint.position;
+                }
+                else
+                {
+                    return startPoint.position;
+                }
             }
         }
         else
         {
             // MODO PATRULLAJE: Usar waypoints fijos
-            return GetCurrentWaypointPosition();
+            Vector3 target = GetCurrentWaypointPosition();
+            return target;
         }
     }
 
@@ -173,16 +203,44 @@ public class MouseMovement : MonoBehaviour
     {
         if (isEscaping)
         {
-            // MODO ESCAPE: Avanzar en el path A*
-            escapePathIndex++;
-
-            // Si llegó al final de la ruta de escape
-            if (escapePathIndex >= escapePath.Count)
+            if (escapingToPortal && targetPortal != null)
             {
-                // Verificar si está cerca del punto inicial
-                if (Vector3.Distance(transform.position, startPoint.position) <= arrivalRadius)
+                // ESCAPE A PORTAL
+                if (escapePath != null && escapePath.Count > 0)
                 {
-                    CompleteEscape();
+                    escapePathIndex++;
+
+                    // Si llegó al final del path A*, verificar si está cerca del portal
+                    if (escapePathIndex >= escapePath.Count)
+                    {
+                        float distanceToPortal = Vector3.Distance(transform.position, targetPortal.transform.position);
+                        if (distanceToPortal <= targetPortal.activationRadius * 1.5f)
+                        {
+                            Debug.Log("?? Cerca del portal, el trigger se encargará del teleport");
+                            // El portal mismo manejará el teleport via OnTriggerEnter
+                        }
+                    }
+                }
+                else
+                {
+                    // Movimiento directo al portal, verificar distancia
+                    float distanceToPortal = Vector3.Distance(transform.position, targetPortal.transform.position);
+                    if (distanceToPortal <= targetPortal.activationRadius * 1.5f)
+                    {
+                        Debug.Log("?? Cerca del portal, esperando trigger");
+                    }
+                }
+            }
+            else
+            {
+                // Sistema anterior (fallback)
+                escapePathIndex++;
+                if (escapePathIndex >= escapePath.Count)
+                {
+                    if (Vector3.Distance(transform.position, startPoint.position) <= arrivalRadius)
+                    {
+                        CompleteEscape();
+                    }
                 }
             }
         }
@@ -196,12 +254,10 @@ public class MouseMovement : MonoBehaviour
     // Avanzar al siguiente waypoint (sistema fijo)
     void MoveToNextWaypoint()
     {
-        Debug.Log($"MoveToNextWaypoint llamado - reachedEndPoint: {reachedEndPoint}, currentWaypointIndex: {currentWaypointIndex}, waypoints.Length: {waypoints.Length}");
 
         if (!reachedEndPoint) // Modo ida (A ? B)
         {
             currentWaypointIndex++;
-            Debug.Log($"Modo IDA - Nuevo índice: {currentWaypointIndex}");
 
             // Si acabamos de pasar el último waypoint, ahora va hacia endPoint
             if (currentWaypointIndex > waypoints.Length)
@@ -210,13 +266,11 @@ public class MouseMovement : MonoBehaviour
                 reachedEndPoint = true;
                 currentWaypointIndex = waypoints.Length - 1; // Empezar desde el último waypoint
                 waypointDirection = -1;
-                Debug.Log("?? Llegó al punto B, iniciando regreso - índice: " + currentWaypointIndex);
             }
         }
         else // Modo vuelta (B ? A)
         {
             currentWaypointIndex--;
-            Debug.Log($"Modo VUELTA - Nuevo índice: {currentWaypointIndex}");
 
             // Si ya pasó el primer waypoint, ahora va hacia startPoint
             if (currentWaypointIndex < -1)
@@ -225,30 +279,118 @@ public class MouseMovement : MonoBehaviour
                 reachedEndPoint = false;
                 currentWaypointIndex = 0; // Empezar desde el primer waypoint
                 waypointDirection = 1;
-                Debug.Log("?? Llegó al punto A, iniciando nueva ida - índice: " + currentWaypointIndex);
             }
         }
-
-        Debug.Log($"Próximo objetivo: {GetCurrentWaypointPosition()}");
     }
 
-    // Iniciar escape con A* pathfinding
+    // Iniciar escape hacia portal
     public void StartEscape()
     {
-        if (isEscaping) return; // Ya está escapando
+        if (isEscaping) return;
 
-        Debug.Log("Iniciando escape con A* pathfinding");
         isEscaping = true;
-        CalculateEscapePath();
+
+        if (usePortalEscape)
+        {
+            StartPortalEscape();
+        }
+        else
+        {
+            // Fallback al sistema anterior
+            CalculateEscapePath();
+        }
     }
 
-    // Calcular path de escape evitando al player
+    // Iniciar escape hacia portal
+    void StartPortalEscape()
+    {
+        Vector3 currentPos = transform.position;
+        Vector3 playerPos = GetPlayerPosition();
+
+        // Encontrar el mejor portal
+        targetPortal = PortalManager.Instance?.FindBestPortal(currentPos, playerPos);
+
+        if (targetPortal == null)
+        {
+            CreateDirectEscapePath();
+            return;
+        }
+
+        // Calcular path A* hacia el portal
+        CalculatePathToPortal();
+    }
+
+    // Calcular path A* hacia el portal
+    void CalculatePathToPortal()
+    {
+        if (pathfindingManager == null || nodeGrid == null)
+        {
+            escapingToPortal = true;
+            escapePath = null;
+            return;
+        }
+
+        Vector3 currentPos = transform.position;
+        Vector3 portalPos = targetPortal.transform.position;
+
+        PFNodes startNode = GetClosestNode(currentPos);
+        PFNodes portalNode = GetClosestNode(portalPos);
+
+        if (startNode != null && portalNode != null)
+        {
+
+            // Usar A* estándar (no necesitamos heurística táctica compleja)
+            escapePath = PathFinding.AstarPS(startNode, portalNode, obstacleMask);
+            escapePathIndex = 0;
+            escapingToPortal = true;
+
+            if (escapePath != null && escapePath.Count > 0)
+            {
+                Debug.Log($"? Path A* al portal calculado con {escapePath.Count} nodos");
+
+                // Debug: mostrar el path
+                for (int i = 0; i < escapePath.Count; i++)
+                {
+                    Debug.Log($"  Nodo {i}: {escapePath[i].transform.position}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("?? A* falló, yendo directo al portal");
+                escapePath = null;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("? No se encontraron nodos válidos, yendo directo al portal");
+            escapePath = null;
+            escapingToPortal = true;
+        }
+    }
+
+    // Obtener posición del player
+    Vector3 GetPlayerPosition()
+    {
+        Transform player = GetPlayerTransform();
+        return player != null ? player.position : transform.position;
+    }
+
+    // Método llamado por el portal cuando teleporta
+    public void CompleteEscapeViaPortal()
+    {
+        isEscaping = false;
+        escapingToPortal = false;
+        targetPortal = null;
+        escapePath = null;
+        ResetToStart();
+    }
+
+    // Calcular path de escape evitando al player (fallback)
     void CalculateEscapePath()
     {
         // Verificar que tenemos los componentes necesarios
         if (pathfindingManager == null || nodeGrid == null)
         {
-            Debug.LogWarning("No se puede calcular escape path - falta PFManager o PFNodeGrid. Usando escape directo.");
             // Fallback: ir directo al punto inicial sin pathfinding
             CreateDirectEscapePath();
             return;
@@ -270,18 +412,15 @@ public class MouseMovement : MonoBehaviour
 
                 if (escapePath == null || escapePath.Count == 0)
                 {
-                    Debug.LogWarning("A* no pudo encontrar path válido, usando escape directo");
                     CreateDirectEscapePath();
                 }
                 else
                 {
                     escapePathIndex = 0;
-                    Debug.Log($"Ruta de escape A* calculada con {escapePath.Count} nodos");
                 }
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Error calculando A* path: {e.Message}. Usando escape directo.");
                 CreateDirectEscapePath();
             }
             finally
@@ -297,7 +436,6 @@ public class MouseMovement : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No se pudieron encontrar nodos válidos para A*, usando escape directo");
             CreateDirectEscapePath();
         }
     }
@@ -309,13 +447,11 @@ public class MouseMovement : MonoBehaviour
         // El ObstacleAvoidance en EnemySteering se encargará de evitar paredes
         escapePath = null; // Indicar que no hay path A*
         escapePathIndex = 0;
-        Debug.Log("Usando escape directo al punto inicial - ObstacleAvoidance manejará las paredes");
     }
 
     // Completar escape y volver al patrullaje
     void CompleteEscape()
     {
-        Debug.Log("Escape completado - volviendo a patrullaje");
         isEscaping = false;
         escapePath = null;
         ResetToStart();
@@ -325,6 +461,8 @@ public class MouseMovement : MonoBehaviour
     public void ResetToStart()
     {
         isEscaping = false;
+        escapingToPortal = false;
+        targetPortal = null;
         reachedEndPoint = false;
         currentWaypointIndex = 0;
         waypointDirection = 1;
@@ -334,7 +472,6 @@ public class MouseMovement : MonoBehaviour
     // Actualizar path de escape si es necesario
     public void UpdatePath()
     {
-        // Solo recalcular durante el escape
         if (!isEscaping) return;
 
         // Solo recalcular cada cierto intervalo
@@ -343,17 +480,35 @@ public class MouseMovement : MonoBehaviour
 
         lastRecalculateTime = Time.time;
 
-        // Verificar si el player se ha movido significativamente
-        Transform player = GetPlayerTransform();
-        if (player != null)
+        if (escapingToPortal)
         {
-            float playerMovementDistance = Vector3.Distance(player.position, lastPlayerPosition);
-
-            // Si el player se movió más de 2 unidades, recalcular escape
-            if (playerMovementDistance > 2f)
+            // Verificar si el portal sigue siendo válido
+            if (targetPortal == null || !targetPortal.IsAvailable)
             {
-                Debug.Log("Player se movió durante escape, recalculando path");
-                CalculateEscapePath();
+                StartPortalEscape();
+                return;
+            }
+
+            // Verificar si el player se movió y hay un portal mejor
+            Vector3 playerPos = GetPlayerPosition();
+            Portal betterPortal = PortalManager.Instance?.FindBestPortal(transform.position, playerPos);
+
+            if (betterPortal != null && betterPortal != targetPortal)
+            {CalculatePathToPortal();
+            }
+        }
+        else
+        {
+            // Sistema anterior de escape
+            Transform player = GetPlayerTransform();
+            if (player != null)
+            {
+                float playerMovementDistance = Vector3.Distance(player.position, lastPlayerPosition);
+
+                if (playerMovementDistance > 2f)
+                {
+                    CalculateEscapePath();
+                }
             }
         }
     }
@@ -494,10 +649,10 @@ public class MouseMovement : MonoBehaviour
             }
         }
 
-        // Dibujar escape path (A*)
-        if (isEscaping && escapePath != null && escapePath.Count > 1)
+        // Dibujar escape path A* hacia portal
+        if (isEscaping && escapingToPortal && escapePath != null && escapePath.Count > 1)
         {
-            Gizmos.color = Color.yellow;
+            Gizmos.color = Color.cyan; // Color diferente para path hacia portal
 
             for (int i = escapePathIndex; i < escapePath.Count - 1; i++)
             {
@@ -509,6 +664,14 @@ public class MouseMovement : MonoBehaviour
                     );
                 }
             }
+        }
+
+        // Dibujar línea al portal objetivo
+        if (isEscaping && escapingToPortal && targetPortal != null)
+        {
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawLine(transform.position, targetPortal.transform.position);
+            Gizmos.DrawWireSphere(targetPortal.transform.position, 1f);
         }
 
         // Dibujar radio de llegada

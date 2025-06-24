@@ -20,7 +20,6 @@ public class PatrolState : State
         waypointLooking = Mathf.RoundToInt(Randoms.RandomRange(3f, 5f));
         AlertSystem.Instance.RegisterEnemy(controller);
         controller.EnemyAnimator.SetBool("IsWalking", true);
-        Debug.Log("Enemigo entró a PatrolState");
     }
 
     public override void Execute()

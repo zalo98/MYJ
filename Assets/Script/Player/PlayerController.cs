@@ -156,13 +156,11 @@ public class PlayerController : MonoBehaviour, ITarget
 
     private void TryInteract()
     {
-        Debug.Log("Tried Interacting");
 
         int elements = Physics.OverlapSphereNonAlloc(interactionPoint.position, interactionRadius, interactables, interactionLayer);
 
         if (elements == 0)
         {
-            Debug.Log("No interactables found");
             return;
         }
 

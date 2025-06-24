@@ -5,6 +5,10 @@ public class EnemyAnimationController : MonoBehaviour
     private Animator animator;
     private EnemyController controller;
 
+    private void Awake()
+    {
+        Initialize();
+    }
     public void Initialize()
     {
         animator = GetComponent<Animator>();
