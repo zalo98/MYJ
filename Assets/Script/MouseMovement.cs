@@ -404,7 +404,7 @@ public class MouseMovement : MonoBehaviour
             finally
             {
                 // Restaurar nodos bloqueados temporalmente
-                RestoreTemporaryBlockedNodes(temporaryBlockedNodes);
+                //RestoreTemporaryBlockedNodes(temporaryBlockedNodes);
             }
 
             // Guardar posición del player para detectar cambios
