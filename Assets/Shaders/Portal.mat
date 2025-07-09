@@ -23,6 +23,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _Texture0:
+        m_Texture: {fileID: 2800000, guid: 25289a84457756448a7b301d975e32c8, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _TextureSample0:
         m_Texture: {fileID: 2800000, guid: 25289a84457756448a7b301d975e32c8, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -31,12 +35,20 @@ Material:
         m_Texture: {fileID: 2800000, guid: bd3edab16d985f8459bb90ff4e725559, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _TextureSample2:
+        m_Texture: {fileID: 2800000, guid: 25289a84457756448a7b301d975e32c8, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _TextureSample3:
         m_Texture: {fileID: 2800000, guid: 25289a84457756448a7b301d975e32c8, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TextureSample4:
         m_Texture: {fileID: 2800000, guid: bd3edab16d985f8459bb90ff4e725559, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TextureSample5:
+        m_Texture: {fileID: 10300, guid: 0000000000000000f000000000000000, type: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _texcoord:
@@ -48,6 +60,7 @@ Material:
     - _AlphaCutoff: 0.5
     - _Float1: 0.6458947
     - _Float2: 0.1
+    - _Float3: 0.1
     - _TessEdgeLength: 16
     - _TessMax: 25
     - _TessMaxDisp: 25
