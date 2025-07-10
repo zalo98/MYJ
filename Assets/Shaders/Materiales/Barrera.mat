@@ -42,7 +42,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AlphaCutoff: 0.5
-    - _Float0: 0.807
+    - _Float0: 1
     - _Float4: 0.72204125
     - _Power: 1
     - _Scale: 0.9

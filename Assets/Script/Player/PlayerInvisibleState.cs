@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerInvisibleState : State
 {
@@ -10,6 +11,8 @@ public class PlayerInvisibleState : State
     private const float visible_Alpha = 1f;
     private const float maxInvisibleTime = 10f;
     private float currentInvisibleTime;
+
+    private Material invisibilityUIMaterial;
 
     public PlayerInvisibleState(FSM fsm, PlayerController controller, PlayerAnimationController animController) : base(fsm)
     {
@@ -23,7 +26,10 @@ public class PlayerInvisibleState : State
         Debug.Log("Entrando en estado Invisible");
         animController.PlayInvisibleAnimation();
         isDetectable = false;
-        
+
+        // Para el material
+        invisibilityUIMaterial = GameObject.Find("InvisibilityUI").GetComponent<Image>().material;
+
         foreach (Renderer renderer in playerController.playerRenderers)
         {
             if (renderer is SkinnedMeshRenderer skinnedRenderer)
@@ -73,7 +79,16 @@ public class PlayerInvisibleState : State
     {
         // Actualizar el timer
         currentInvisibleTime -= Time.deltaTime;
-        
+
+        // Calcular porcentaje (1 = lleno, 0 = vacío)
+        float timePercentage = 1f - (currentInvisibleTime / maxInvisibleTime);
+
+        // Actualizar el shader
+        if (invisibilityUIMaterial != null)
+        {
+            invisibilityUIMaterial.SetFloat("_Timer", timePercentage);
+        }
+
         // Si el timer llega a 0, cambiar a IdleState
         if (currentInvisibleTime <= 0)
         {
